@@ -222,7 +222,7 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="0" column="0">
-             <widget class="QTableWidget" name="TransitionTableTableWidget">
+             <widget class="QTableWidget" name="transitionTableTableWidget">
               <property name="rowCount">
                <number>1</number>
               </property>
