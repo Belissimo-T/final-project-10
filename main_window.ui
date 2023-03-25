@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>930</width>
+    <height>865</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
+    <item>
+     <widget class="QFrame" name="toolBarFrame">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <item alignment="Qt::AlignLeft">
+        <widget class="QToolButton" name="playToolButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Start</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="toolTip">
+             <string>Number of full simulation steps per frame</string>
+            </property>
+            <property name="text">
+             <string>Speed</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="speedSpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="FullStepToolButton">
+         <property name="text">
+          <string>Full Step</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="StepOneTurmiteToolButton">
+         <property name="text">
+          <string>Step one turmite</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QGroupBox" name="simulationGroupBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Simulation</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QGraphicsView" name="SimulationView"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="graphicsStatusLabel">
+          <property name="text">
+           <string>Status</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QGroupBox" name="rulesGroupBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Rules</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QSplitter" name="splitter_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string>Cell States</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QListView" name="cellStatesListView">
+              <property name="viewMode">
+               <enum>QListView::IconMode</enum>
+              </property>
+              <property name="itemAlignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="title">
+            <string>Turmite States</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="0">
+             <widget class="QListView" name="turmiteStatesListView">
+              <property name="viewMode">
+               <enum>QListView::IconMode</enum>
+              </property>
+              <property name="itemAlignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="title">
+            <string>Transition Table</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_5">
+            <item row="0" column="0">
+             <widget class="QTableWidget" name="TransitionTableTableWidget">
+              <property name="rowCount">
+               <number>1</number>
+              </property>
+              <property name="columnCount">
+               <number>5</number>
+              </property>
+              <attribute name="horizontalHeaderVisible">
+               <bool>true</bool>
+              </attribute>
+              <attribute name="horizontalHeaderCascadingSectionResizes">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="horizontalHeaderHighlightSections">
+               <bool>true</bool>
+              </attribute>
+              <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="horizontalHeaderStretchLastSection">
+               <bool>true</bool>
+              </attribute>
+              <row/>
+              <column>
+               <property name="text">
+                <string>Current Cell Color</string>
+               </property>
+               <property name="font">
+                <font>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="textAlignment">
+                <set>AlignLeading|AlignVCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Current Turmite State</string>
+               </property>
+               <property name="font">
+                <font>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="textAlignment">
+                <set>AlignLeading|AlignVCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Turn Direction</string>
+               </property>
+               <property name="font">
+                <font>
+                 <underline>true</underline>
+                </font>
+               </property>
+               <property name="textAlignment">
+                <set>AlignLeading|AlignVCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>New Cell Color</string>
+               </property>
+               <property name="font">
+                <font>
+                 <underline>true</underline>
+                </font>
+               </property>
+               <property name="textAlignment">
+                <set>AlignLeading|AlignVCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>New Turmite State</string>
+               </property>
+               <property name="font">
+                <font>
+                 <underline>true</underline>
+                </font>
+               </property>
+               <property name="textAlignment">
+                <set>AlignLeading|AlignVCenter</set>
+               </property>
+              </column>
+              <item row="0" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>930</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuSave">
+     <property name="title">
+      <string>Save or Export</string>
+     </property>
+     <addaction name="actionSaveProject"/>
+     <addaction name="actionSaveSimulationView"/>
+     <addaction name="actionSaveRules"/>
+    </widget>
+    <addaction name="menuSave"/>
+    <addaction name="actionOpen"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuSimulation">
+    <property name="title">
+     <string>Simulation</string>
+    </property>
+    <addaction name="actionPlay"/>
+    <addaction name="separator"/>
+    <addaction name="actionFullStep"/>
+    <addaction name="actionStepOneTurmite"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuSimulation"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionSaveSimulationView">
+   <property name="text">
+    <string>Simulation View</string>
+   </property>
+  </action>
+  <action name="actionSaveRules">
+   <property name="text">
+    <string>Rules</string>
+   </property>
+  </action>
+  <action name="actionSaveProject">
+   <property name="text">
+    <string>Project</string>
+   </property>
+  </action>
+  <action name="actionFullStep">
+   <property name="text">
+    <string>Full step</string>
+   </property>
+  </action>
+  <action name="actionStepOneTurmite">
+   <property name="text">
+    <string>Step one turmite</string>
+   </property>
+  </action>
+  <action name="actionPlay">
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="actionOpenProject">
+   <property name="text">
+    <string>Project</string>
+   </property>
+  </action>
+  <action name="actionOpenSimulationView">
+   <property name="text">
+    <string>Simulation View</string>
+   </property>
+  </action>
+  <action name="actionOpenRules">
+   <property name="text">
+    <string>Rules</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
