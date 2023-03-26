@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import dataclasses
 import typing
 
-from .infinite_grid import InfiniteGrid, Pos
+from .infinite_grid import InfiniteGrid, Position
 
 TurmiteDirection = typing.Literal[0, 1, 2, 3]
 TurmiteTurnDirection = int
@@ -14,11 +16,15 @@ class UnknownStateError(Exception):
 
 
 class TransitionTable:
-    def __init__(self):
-        self._transition_dict: dict[
-            tuple[CellColor, TurmiteState],
-            tuple[TurmiteTurnDirection, CellColor, TurmiteState]
-        ] = {}
+    _TransitionDictType = typing.Dict[
+        typing.Tuple[CellColor, TurmiteState],
+        typing.Tuple[TurmiteTurnDirection, CellColor, TurmiteState]
+    ]
+
+    def __init__(self, _transition_dict: _TransitionDictType = None):
+        self._transition_dict: TransitionTable._TransitionDictType = (
+            {} if _transition_dict is None else _transition_dict
+        )
 
     def get_entry(self,
                   cell_color: CellColor,
@@ -29,16 +35,29 @@ class TransitionTable:
         except KeyError as e:
             raise UnknownStateError from e
 
+    def __iter__(self):
+        return iter(self._transition_dict.items())
+
+    def __len__(self):
+        return len(self._transition_dict)
+
+    def to_json(self) -> list:
+        return list(self._transition_dict.items())
+
+    @classmethod
+    def from_json(cls, data: list) -> "TransitionTable":
+        return cls({tuple(key): tuple(value) for key, value in data})
+
 
 @dataclasses.dataclass
 class Turmite:
     transition_table: TransitionTable
 
     # position
-    pos: Pos
+    position: Position = (0, 0)
 
-    direction: TurmiteDirection
-    state: TurmiteState
+    direction: TurmiteDirection = 0
+    state: TurmiteState = 0
 
     def step(self, cell_color: CellColor) -> CellColor:
         turn_direction, new_cell_color, self.state = self.transition_table.get_entry(cell_color, self.state)
@@ -51,7 +70,7 @@ class Turmite:
         return new_cell_color
 
     def _go_forward(self):
-        x, y = self.pos
+        x, y = self.position
 
         if self.direction == 0:
             y += 1  # up
@@ -62,26 +81,57 @@ class Turmite:
         elif self.direction == 3:
             x += 1  # right
 
-        self.pos = x, y
+        self.position = x, y
+
+    def to_json(self) -> dict:
+        return {
+            "transition_table": self.transition_table.to_json(),
+            "position": self.position,
+            "direction": self.direction,
+            "state": self.state
+        }
+
+    @classmethod
+    def from_json(cls, data: dict) -> "Turmite":
+        return cls(
+            TransitionTable.from_json(data["transition_table"]),
+            data["position"],
+            data["direction"],
+            data["state"]
+        )
 
 
 class MultipleTurmiteModel:
-    def __init__(self, turmites: list[Turmite]):
-        self.turmites = turmites
-        self.grid = InfiniteGrid[CellColor](default=0)
-        self.small_step = 0
+    def __init__(self, turmites: list[Turmite] = None, grid: InfiniteGrid[CellColor] = None, _small_step: int = 0):
+        self.turmites = [] if turmites is None else turmites
+        self.grid = InfiniteGrid[CellColor](default=0) if grid is None else grid
+        self.small_step = _small_step
 
     def step_small(self):
-        curr_turmite = self.turmites.pop(0)
+        curr_turmite = self.turmites[self.small_step]
 
-        turmite_pos = curr_turmite.pos
+        turmite_pos = curr_turmite.position
         new_color = curr_turmite.step(self.grid[turmite_pos])
         self.grid[turmite_pos] = new_color
 
-        self.turmites.append(curr_turmite)
         self.small_step += 1
         self.small_step %= len(self.turmites)
 
     def step(self):
         for _ in range(len(self.turmites)):
             self.step_small()
+
+    def to_json(self) -> dict:
+        return {
+            "turmites": [turmite.to_json() for turmite in self.turmites],
+            "grid": self.grid.to_json(),
+            "small_step": self.small_step
+        }
+
+    @classmethod
+    def from_json(cls, data: dict) -> "MultipleTurmiteModel":
+        return cls(
+            [Turmite.from_json(turmite_json) for turmite_json in data["turmites"]],
+            InfiniteGrid.from_json(data["grid"]),
+            data["small_step"]
+        )
