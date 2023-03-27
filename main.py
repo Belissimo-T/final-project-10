@@ -16,7 +16,7 @@ class StateColorManager:
 
     def __init__(self, states: dict["TurmiteState | CellColor", QtG.QColor] = None):
         self.states: dict[StateColorManager.StateType, QtG.QColor] = {} if states is None else states
-        self.subscribers: list[StateWidget] = []
+        self.subscribers: list[StateComboBox] = []
 
     def to_json(self) -> dict:
         return {str(state): color.rgb() for state, color in self.states.items()}
@@ -25,7 +25,7 @@ class StateColorManager:
     def from_json(cls, data: dict) -> "StateColorManager":
         return cls({int(state): QtG.QColor(color) for state, color in data.items()})
 
-    def subscribe(self, subscriber: "StateWidget"):
+    def subscribe(self, subscriber: "StateComboBox"):
         self.subscribers.append(subscriber)
 
     def notify_subscribers(self):
@@ -33,7 +33,7 @@ class StateColorManager:
             subscriber.display()
 
 
-class StateWidget(QtW.QWidget):
+class StateComboBox(QtW.QWidget):
     def __init__(self, state: StateColorManager.StateType, state_mgr: StateColorManager):
         super().__init__()
 
@@ -51,8 +51,10 @@ class StateWidget(QtW.QWidget):
 
         self.combo_box.clear()
         for state, color in self.state_mgr.states.items():
-            self.combo_box.addItem(str(state), state)
-            # self.combo_box.setItemData(self.combo_box.count() - 1, color, Qt.BackgroundRole)
+            pixmap = QtG.QPixmap(100, 100)
+            pixmap.fill(color)
+            icon = QtG.QIcon(pixmap)
+            self.combo_box.addItem(icon, str(state), state)
 
         self.combo_box.setCurrentIndex(self.combo_box.findData(target_state))
 
@@ -60,7 +62,7 @@ class StateWidget(QtW.QWidget):
         return self.combo_box.currentData()
 
 
-class AddStateWidget(QtW.QWidget):
+class AddStateButton(QtW.QWidget):
     def __init__(self, parent, msg: str):
         super().__init__(parent)
 
@@ -106,11 +108,13 @@ class ProjectView:
         for row, (key, value) in enumerate(turmite.transition_table):
             (cell_color, turmite_state) = key
             (turn_direction, new_cell_color, new_turmite_state) = value
-            self.ui.transitionTableTableWidget.setCellWidget(row, 0, StateWidget(cell_color, self.project.cell_states_mgr))
-            self.ui.transitionTableTableWidget.setCellWidget(row, 1, StateWidget(turmite_state, state_mgr))
+            self.ui.transitionTableTableWidget.setCellWidget(row, 0,
+                                                             StateComboBox(cell_color, self.project.cell_states_mgr))
+            self.ui.transitionTableTableWidget.setCellWidget(row, 1, StateComboBox(turmite_state, state_mgr))
             self.ui.transitionTableTableWidget.setCellWidget(row, 2, QtW.QLabel(str(turn_direction)))
-            self.ui.transitionTableTableWidget.setCellWidget(row, 3, StateWidget(new_cell_color, self.project.cell_states_mgr))
-            self.ui.transitionTableTableWidget.setCellWidget(row, 4, StateWidget(new_turmite_state, state_mgr))
+            self.ui.transitionTableTableWidget.setCellWidget(row, 3, StateComboBox(new_cell_color,
+                                                                                   self.project.cell_states_mgr))
+            self.ui.transitionTableTableWidget.setCellWidget(row, 4, StateComboBox(new_turmite_state, state_mgr))
 
         self.draw_add_transition_table_entry()
 
@@ -137,9 +141,9 @@ class ProjectView:
 
         col = 0
         for col, state in enumerate(state_mgr.states):
-            table.setCellWidget(0, col, StateWidget(state, state_mgr))
+            table.setCellWidget(0, col, StateComboBox(state, state_mgr))
 
-        add_state_widget = AddStateWidget(table, msg)
+        add_state_widget = AddStateButton(table, msg)
         table.setCellWidget(0, col + 1, add_state_widget)
 
         self.setup_state_table(table)
