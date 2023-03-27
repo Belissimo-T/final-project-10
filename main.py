@@ -1,3 +1,4 @@
+import abc
 import dataclasses
 import json
 import sys
@@ -11,12 +12,17 @@ from main_window import Ui_MainWindow
 from turmites.turmite import TransitionTable, MultipleTurmiteModel, TurmiteState, CellColor
 
 
+class Subscribable(typing.Protocol):
+    def display(self):
+        ...
+
+
 class StateColorManager:
     StateType = typing.Union[TurmiteState, CellColor]
 
     def __init__(self, states: dict["TurmiteState | CellColor", QtG.QColor] = None):
         self.states: dict[StateColorManager.StateType, QtG.QColor] = {} if states is None else states
-        self.subscribers: list[StateComboBox] = []
+        self.subscribers: list[Subscribable] = []
 
     def to_json(self) -> dict:
         return {str(state): color.rgb() for state, color in self.states.items()}
@@ -25,12 +31,27 @@ class StateColorManager:
     def from_json(cls, data: dict) -> "StateColorManager":
         return cls({int(state): QtG.QColor(color) for state, color in data.items()})
 
-    def subscribe(self, subscriber: "StateComboBox"):
+    def subscribe(self, subscriber: Subscribable):
         self.subscribers.append(subscriber)
 
     def notify_subscribers(self):
         for subscriber in self.subscribers:
             subscriber.display()
+
+
+def get_pixmap(color: QtG.QColor):
+    pixmap = QtG.QPixmap(16, 16)
+    pixmap.fill(color)
+
+    return pixmap
+
+
+def get_icon(color: QtG.QColor):
+    pixmap = get_pixmap(color)
+
+    icon = QtG.QIcon(pixmap)
+
+    return icon
 
 
 class StateComboBox(QtW.QWidget):
@@ -51,9 +72,7 @@ class StateComboBox(QtW.QWidget):
 
         self.combo_box.clear()
         for state, color in self.state_mgr.states.items():
-            pixmap = QtG.QPixmap(100, 100)
-            pixmap.fill(color)
-            icon = QtG.QIcon(pixmap)
+            icon = get_icon(color)
             self.combo_box.addItem(icon, str(state), state)
 
         self.combo_box.setCurrentIndex(self.combo_box.findData(target_state))
@@ -92,6 +111,29 @@ class Project:
             StateColorManager.from_json(data["cell_states"]),
             [StateColorManager.from_json(mgr) for mgr in data["turmite_states"]]
         )
+
+
+class StateWidget(QtW.QWidget):
+    def __init__(self, state: int, mgr: StateColorManager):
+        super().__init__()
+
+        self.state = state
+        self.mgr = mgr
+        self.display()
+        mgr.subscribe(self)
+
+    def display(self):
+        mainLayout = QtW.QHBoxLayout()
+        label = QtW.QLabel(str(self.state))
+
+        pm = get_pixmap(self.mgr.states[self.state])
+        color_label = QtW.QLabel()
+        color_label.setPixmap(pm)
+        color_label.setSizePolicy(QtW.QSizePolicy(QtW.QSizePolicy.Maximum, QtW.QSizePolicy.Maximum))
+
+        mainLayout.addWidget(color_label)
+        mainLayout.addWidget(label)
+        self.setLayout(mainLayout)
 
 
 class ProjectView:
@@ -141,7 +183,7 @@ class ProjectView:
 
         col = 0
         for col, state in enumerate(state_mgr.states):
-            table.setCellWidget(0, col, StateComboBox(state, state_mgr))
+            table.setCellWidget(0, col, StateWidget(state, state_mgr))
 
         add_state_widget = AddStateButton(table, msg)
         table.setCellWidget(0, col + 1, add_state_widget)
