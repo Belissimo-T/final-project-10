@@ -35,6 +35,23 @@ class TransitionTable:
         except KeyError as e:
             raise UnknownStateError from e
 
+    def set_entry(self,
+                  cell_color: CellColor,
+                  turmite_state: TurmiteState,
+                  turn_direction: TurmiteTurnDirection,
+                  new_cell_color: CellColor,
+                  new_turmite_state: TurmiteState
+                  ):
+        self._transition_dict[cell_color, turmite_state] = (
+            turn_direction, new_cell_color, new_turmite_state
+        )
+
+    def clear(self):
+        self._transition_dict.clear()
+
+    def invert_direction(self) -> TransitionTable:
+        return TransitionTable({key: (-value[0], value[1], value[2]) for key, value in self._transition_dict.items()})
+
     def __iter__(self):
         return iter(self._transition_dict.items())
 
@@ -53,7 +70,6 @@ class TransitionTable:
 class Turmite:
     transition_table: TransitionTable
 
-    # position
     position: Position = (0, 0)
 
     direction: TurmiteDirection = 0

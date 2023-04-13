@@ -19,7 +19,7 @@ class InfiniteGrid(typing.Generic[T]):
 
     def __setitem__(self, key: Position, value: T):
         if value == self._default:
-            self._grid.pop(key)
+            self._grid.pop(key, None)
         else:
             self._grid[key] = value
 
@@ -39,6 +39,7 @@ class InfiniteGrid(typing.Generic[T]):
 
     @classmethod
     def from_json(cls, data: dict) -> "InfiniteGrid":
+        # noinspection PyTypeChecker
         return cls(
             data["default"],
             dict(

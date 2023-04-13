@@ -1,23 +1,28 @@
+import copy
 import json
 
 from turmites.turmite import *
 from turmites.examples import langtons_ant_transition_table
-from main import Project, StateColorManager, QtG
+from main import Project, StateColors, QtG
 
 
 def main():
     turmite = Turmite(
         langtons_ant_transition_table
     )
+    turmite2 = Turmite(
+        langtons_ant_transition_table.invert_direction()
+    )
+    turmite2.position = 100, 100
 
-    model = MultipleTurmiteModel([turmite])
+    model = MultipleTurmiteModel([turmite, turmite2])
     for _ in range(15_000):
         model.step()
 
     p = Project(
         model,
-        StateColorManager({0: QtG.QColor(0xFF_000000), 1: QtG.QColor(0xFF_FFFFFF)}),
-        [StateColorManager({0: QtG.QColor(0xFF_00FF00)})]
+        StateColors({0: QtG.QColor(0xFF_000000), 1: QtG.QColor(0xFF_FFFFFF)}),
+        [StateColors({0: QtG.QColor(0xFF_00FF00)})] * 2
     )
     data = p.to_json()
 
