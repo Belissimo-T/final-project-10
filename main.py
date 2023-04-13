@@ -109,13 +109,13 @@ class AddStateButton(QtW.QWidget):
 @dataclasses.dataclass
 class Project:
     model: MultipleTurmiteModel = dataclasses.field(default_factory=MultipleTurmiteModel)
-    state_colors: StateColors = dataclasses.field(default_factory=StateColors)
+    cell_state_colors: StateColors = dataclasses.field(default_factory=StateColors)
     turmite_state_colors: list[StateColors] = dataclasses.field(default_factory=list)
 
     def to_json(self) -> dict:
         return {
             "model": self.model.to_json(),
-            "cell_state_colors": self.state_colors.to_json(),
+            "cell_state_colors": self.cell_state_colors.to_json(),
             "turmite_state_colors": [mgr.to_json() for mgr in self.turmite_state_colors]
         }
 
@@ -159,7 +159,7 @@ class ProjectView:
         table = self.ui.transitionTableTableWidget
 
         turmite = self.current_turmite()
-        state_colors = self.current_colors()
+        state_colors = self.current_turmite_colors()
 
         table.setRowCount(len(turmite.transition_table))
 
@@ -169,10 +169,10 @@ class ProjectView:
 
             update_callback = lambda *_, __row=row: self.update_transition_table()
 
-            table.setCellWidget(row, 0, StateComboBox(cell_color, self.project.state_colors, update_callback))
+            table.setCellWidget(row, 0, StateComboBox(cell_color, self.project.cell_state_colors, update_callback))
             table.setCellWidget(row, 1, StateComboBox(turmite_state, state_colors, update_callback))
             table.setCellWidget(row, 2, TurnDirectionComboBox(turn_direction, update_callback))
-            table.setCellWidget(row, 3, StateComboBox(new_cell_color, self.project.state_colors, update_callback))
+            table.setCellWidget(row, 3, StateComboBox(new_cell_color, self.project.cell_state_colors, update_callback))
             table.setCellWidget(row, 4, StateComboBox(new_turmite_state, state_colors, update_callback))
 
         self.draw_add_transition_table_entry()
@@ -183,7 +183,7 @@ class ProjectView:
     def current_turmite(self):
         return self.project.model.turmites[self.ui.selectedTurmiteComboBox.currentIndex()]
 
-    def current_colors(self):
+    def current_turmite_colors(self):
         return self.project.turmite_state_colors[self.ui.selectedTurmiteComboBox.currentIndex()]
 
     def update_transition_table(self):
@@ -228,10 +228,7 @@ class ProjectView:
 
         self.ui.selectedTurmiteComboBox.currentIndexChanged.connect(self.draw_turmite_specific)
 
-    def draw_state_table(self, msg: str):
-        table = self.ui.turmiteStatesTableWidget
-        state_colors = self.current_colors()
-
+    def draw_state_table(self, table: QtW.QTableWidget, state_colors: StateColors, msg: str):
         table.setRowCount(1)
         table.setColumnCount(len(state_colors.states) + 1)
 
@@ -266,7 +263,7 @@ class ProjectView:
             QtW.QHeaderView.ResizeMode.Interactive
         )
 
-        self.draw_state_table("Add Cell State")
+        self.draw_state_table(self.ui.cellStatesTableWidget, self.project.cell_state_colors, "Add Cell State")
         self.draw_turmites_combo_box()
 
         self.draw_turmite_specific()
@@ -288,7 +285,7 @@ class ProjectView:
 
     def draw_turmite_specific(self):
         self.draw_transition_table()
-        self.draw_state_table("Add Turmite State")
+        self.draw_state_table(self.ui.turmiteStatesTableWidget, self.current_turmite_colors(), "Add Turmite State")
 
 
 class MainWindow(QtW.QMainWindow, Ui_MainWindow):
