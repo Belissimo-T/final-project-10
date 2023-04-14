@@ -18,6 +18,13 @@ class StateColors:
     def __init__(self, states: dict["TurmiteState | CellColor", QtG.QColor] = None):
         self.states: dict[StateColors.StateType, QtG.QColor] = {} if states is None else states
 
+    def next_free_state(self) -> StateType:
+        for i in range(len(self.states)):
+            if i not in self.states:
+                return i
+
+        return len(self.states)
+
     def to_json(self) -> dict:
         return {str(state): color.rgb() for state, color in self.states.items()}
 
@@ -97,13 +104,23 @@ class TurnDirectionComboBox(QtW.QWidget):
 
 
 class AddStateButton(QtW.QWidget):
-    def __init__(self, parent, msg: str):
+    def __init__(self, parent, msg: str, callback):
         super().__init__(parent)
 
         self.main_layout = QtW.QVBoxLayout()
         self.button = QtW.QPushButton(msg)
         self.main_layout.addWidget(self.button)
         self.setLayout(self.main_layout)
+
+        self.callback = callback
+        self.button.clicked.connect(self.on_clicked)
+
+    def on_clicked(self):
+        # open colorchooser
+        color = QtW.QColorDialog.getColor()
+
+        if color.isValid():
+            self.callback(color)
 
 
 @dataclasses.dataclass
@@ -167,7 +184,7 @@ class ProjectView:
             cell_color, turmite_state = key
             turn_direction, new_cell_color, new_turmite_state = value
 
-            update_callback = lambda *_, __row=row: self.update_transition_table()
+            update_callback = lambda *_: self.update_transition_table()
 
             table.setCellWidget(row, 0, StateComboBox(cell_color, self.project.cell_state_colors, update_callback))
             table.setCellWidget(row, 1, StateComboBox(turmite_state, state_colors, update_callback))
@@ -208,8 +225,6 @@ class ProjectView:
                 turn_direction, new_cell_color, new_turmite_state
             )
 
-        self.draw_transition_table()
-
     def draw_add_transition_table_entry(self):
         row = self.ui.transitionTableTableWidget.rowCount()
         self.ui.transitionTableTableWidget.insertRow(row)
@@ -236,10 +251,19 @@ class ProjectView:
         for col, state in enumerate(state_colors.states):
             table.setCellWidget(0, col, StateWidget(state, state_colors))
 
-        add_state_widget = AddStateButton(table, msg)
+        def callback(color: QtG.QColor):
+            new_state = state_colors.next_free_state()
+            self.set_state_color(table, state_colors, new_state, color, msg)
+
+        add_state_widget = AddStateButton(table, msg, callback)
         table.setCellWidget(0, col + 1, add_state_widget)
 
         self.setup_state_table(table)
+
+    def set_state_color(self, table: QtW.QTableWidget, state_colors: StateColors, state: StateColors.StateType,
+                        color: QtG.QColor, msg: str):
+        state_colors.states[state] = color
+        self.draw_state_table(table, state_colors, msg)
 
     @staticmethod
     def setup_state_table(table: QtW.QTableWidget):
