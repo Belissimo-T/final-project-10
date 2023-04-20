@@ -156,11 +156,14 @@ class StateWidget(QtW.QWidget):
     def display(self):
         main_layout = QtW.QHBoxLayout()
         label = QtW.QLabel(str(self.state))
+        # set label background to white
+        label.setStyleSheet("background-color: white")
 
         pm = get_pixmap(self.mgr.states[self.state])
         color_label = QtW.QLabel()
         color_label.setPixmap(pm)
         color_label.setSizePolicy(QtW.QSizePolicy(QtW.QSizePolicy.Maximum, QtW.QSizePolicy.Maximum))
+        color_label.setStyleSheet("border: 1px solid black;")
 
         main_layout.addWidget(color_label)
         main_layout.addWidget(label)
@@ -244,6 +247,10 @@ class ProjectView:
         self.ui.selectedTurmiteComboBox.currentIndexChanged.connect(self.draw_turmite_specific)
 
     def draw_state_table(self, table: QtW.QTableWidget, state_colors: StateColors, msg: str):
+        palette = table.palette()
+        palette.setBrush(QtG.QPalette.Base, QtG.QBrush(QtG.QColor(0, 0, 0), Qt.BDiagPattern))
+        table.setPalette(palette)
+
         table.setRowCount(1)
         table.setColumnCount(len(state_colors.states) + 1)
 
