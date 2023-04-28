@@ -247,9 +247,9 @@ class ProjectView:
         self.ui.selectedTurmiteComboBox.currentIndexChanged.connect(self.draw_turmite_specific)
 
     def draw_state_table(self, table: QtW.QTableWidget, state_colors: StateColors, msg: str):
-        palette = table.palette()
-        palette.setBrush(QtG.QPalette.Base, QtG.QBrush(QtG.QColor(0, 0, 0), Qt.BDiagPattern))
-        table.setPalette(palette)
+        # palette = table.palette()
+        # palette.setBrush(QtG.QPalette.Base, QtG.QBrush(QtG.QColor(0, 0, 0), Qt.BDiagPattern))
+        # table.setPalette(palette)
 
         table.setRowCount(1)
         table.setColumnCount(len(state_colors.states) + 1)
