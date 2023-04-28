@@ -1,4 +1,3 @@
-import copy
 import json
 
 from turmites.turmite import *

@@ -122,6 +122,19 @@ class AddStateButton(QtW.QWidget):
             self.callback(color)
 
 
+class AddListEntryButton(QtW.QWidget):
+    def __init__(self, parent, callback):
+        super().__init__(parent)
+
+        self.main_layout = QtW.QVBoxLayout()
+        self.button = QtW.QPushButton("Add Transition Table Entry")
+        self.main_layout.addWidget(self.button)
+        self.setLayout(self.main_layout)
+
+        self.callback = callback
+        self.button.clicked.connect(callback)
+
+
 @dataclasses.dataclass
 class Project:
     model: MultipleTurmiteModel = dataclasses.field(default_factory=MultipleTurmiteModel)
@@ -217,6 +230,17 @@ class ProjectView:
         table.resizeRowsToContents()
         table.resizeColumnsToContents()
 
+    def draw_add_transition_table_entry(self):
+        row = self.ui.transitionTableTableWidget.rowCount()
+        self.ui.transitionTableTableWidget.insertRow(row)
+
+        self.ui.transitionTableTableWidget.setCellWidget(row, 0, AddListEntryButton(self.ui.transitionTableTableWidget, self.add_transition_table_entry))
+
+    def add_transition_table_entry(self):
+        self.current_turmite().transition_table
+
+        self.update_transition_table()
+
     def current_turmite(self):
         return self.project.model.turmites[self.ui.selectedTurmiteComboBox.currentIndex()]
 
@@ -244,16 +268,6 @@ class ProjectView:
                 cell_color, turmite_state,
                 turn_direction, new_cell_color, new_turmite_state
             )
-
-    def draw_add_transition_table_entry(self):
-        row = self.ui.transitionTableTableWidget.rowCount()
-        self.ui.transitionTableTableWidget.insertRow(row)
-        self.ui.transitionTableTableWidget.setCellWidget(row, 0, QtW.QLabel("Add new entry"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 1, QtW.QLabel("Add"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 2, QtW.QLabel("Add"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 3, QtW.QLabel("Add"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 4, QtW.QLabel("Add"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 5, QtW.QLabel("Add"))
 
     def draw_turmites_combo_box(self):
         self.ui.selectedTurmiteComboBox.clear()
@@ -335,8 +349,6 @@ class ProjectView:
         self.ui.actionSaveProject.triggered.connect(self.save_project)
 
     def save_project(self):
-        # open qt file dialog with default suffix .json
-
         file_path, *_ = QtW.QFileDialog.getSaveFileName(self.ui.centralwidget, "Save Project", "", "JSON (*.json)")
 
         if not file_path:
@@ -385,7 +397,6 @@ def main(args: list[str]):
 
     app = QtW.QApplication(args)
     window = MainWindow(test_proj)
-    # window.draw_transition_table(test_model.turmites[0].transition_table)
     window.show()
     app.exec_()
 
