@@ -116,7 +116,6 @@ class AddStateButton(QtW.QWidget):
         self.button.clicked.connect(self.on_clicked)
 
     def on_clicked(self):
-        # open colorchooser
         color = QtW.QColorDialog.getColor()
 
         if color.isValid():
@@ -146,12 +145,30 @@ class Project:
 
 
 class StateWidget(QtW.QWidget):
-    def __init__(self, state: int, mgr: StateColors):
+    def __init__(self, state: int, mgr: StateColors, delete_callback, change_callback):
         super().__init__()
 
         self.state = state
         self.mgr = mgr
+        self.delete_callback = delete_callback
+        self.change_callback = change_callback
         self.display()
+
+    def contextMenuEvent(self, event: QtG.QContextMenuEvent) -> None:
+        menu = QtW.QMenu()
+        change_action = menu.addAction("Change Color")
+        delete_action = menu.addAction("Delete")
+
+        delete_action.triggered.connect(self.delete_callback)
+        change_action.triggered.connect(self.on_change)
+
+        menu.exec_(self.mapToGlobal(event.pos()))
+
+    def on_change(self):
+        color = QtW.QColorDialog.getColor()
+
+        if color.isValid():
+            self.change_callback(self.state, color)
 
     def display(self):
         main_layout = QtW.QHBoxLayout()
@@ -251,18 +268,26 @@ class ProjectView:
         # palette.setBrush(QtG.QPalette.Base, QtG.QBrush(QtG.QColor(0, 0, 0), Qt.BDiagPattern))
         # table.setPalette(palette)
 
+        table.clear()
         table.setRowCount(1)
         table.setColumnCount(len(state_colors.states) + 1)
 
-        col = 0
+        col = -1
         for col, state in enumerate(state_colors.states):
-            table.setCellWidget(0, col, StateWidget(state, state_colors))
+            table.setCellWidget(
+                0, col,
+                StateWidget(
+                    state, state_colors,
+                    lambda *_, __i=col: self.remove_state_color(table, state_colors, __i, msg),
+                    lambda state, color: self.set_state_color(table, state_colors, state, color, msg)
+                )
+            )
 
-        def callback(color: QtG.QColor):
+        def add_color_callback(color: QtG.QColor):
             new_state = state_colors.next_free_state()
             self.set_state_color(table, state_colors, new_state, color, msg)
 
-        add_state_widget = AddStateButton(table, msg, callback)
+        add_state_widget = AddStateButton(table, msg, add_color_callback)
         table.setCellWidget(0, col + 1, add_state_widget)
 
         self.setup_state_table(table)
@@ -271,6 +296,14 @@ class ProjectView:
                         color: QtG.QColor, msg: str):
         state_colors.states[state] = color
         self.draw_state_table(table, state_colors, msg)
+        self.draw_transition_table()
+
+    def remove_state_color(self, table: QtW.QTableWidget, state_colors: StateColors, index: int, msg: str) -> None:
+        key = list(state_colors.states.keys())[index]
+
+        del state_colors.states[key]
+        self.draw_state_table(table, state_colors, msg)
+        self.draw_transition_table()
 
     @staticmethod
     def setup_state_table(table: QtW.QTableWidget):
