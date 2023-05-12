@@ -139,7 +139,6 @@ class TurmitesGraphicsView:
         self.turmite_state_colors = turmite_state_colors
 
         self.scene = QtW.QGraphicsScene()
-        self.scene.setBackgroundBrush(cell_state_colors.get_color(turmite_model.grid.default))
 
         self.view = graphics_view
         self.view.setScene(self.scene)
@@ -167,6 +166,9 @@ class TurmitesGraphicsView:
         if position in self.cell_graphics_items:
             self.scene.removeItem(self.cell_graphics_items[position])
 
+        if cell_state == self.turmite_model.grid.default:
+            return
+
         self.cell_graphics_items[position] = self.scene.addRect(
             QtC.QRectF(x * self._scale, y * self._scale, self._scale, self._scale),
             QtG.QPen(QtG.QColor(0, 0, 0)),
@@ -190,6 +192,11 @@ class TurmitesGraphicsView:
             )
 
     def init_grid(self):
+        self.scene.setBackgroundBrush(self.cell_state_colors.get_color(self.turmite_model.grid.default))
+
+        for item in self.cell_graphics_items.values():
+            self.scene.removeItem(item)
+
         self.cell_graphics_items: dict[Position, QtW.QGraphicsItem] = {}
 
         for position, cell_state in self.turmite_model.grid.items():
@@ -397,12 +404,18 @@ class ProjectView:
         self.draw_state_table(table, state_colors, msg)
         self.draw_transition_table()
 
+        self.turmites_view.init_grid()
+        self.turmites_view.draw_turmites()
+
     def remove_state_color(self, table: QtW.QTableWidget, state_colors: StateColors, index: int, msg: str) -> None:
         key = list(state_colors.states.keys())[index]
 
         del state_colors.states[key]
         self.draw_state_table(table, state_colors, msg)
         self.draw_transition_table()
+
+        self.turmites_view.init_grid()
+        self.turmites_view.draw_turmites()
 
     @staticmethod
     def setup_state_table(table: QtW.QTableWidget):
