@@ -123,7 +123,6 @@ class AddStateButton(QtW.QWidget):
         self.button.clicked.connect(self.on_clicked)
 
     def on_clicked(self):
-        # open colorchooser
         color = QtW.QColorDialog.getColor()
 
         if color.isValid():
@@ -192,6 +191,19 @@ class TurmitesGraphicsView:
             self.view.scale(0.9, 0.9)
 
 
+class AddListEntryButton(QtW.QWidget):
+    def __init__(self, parent, callback):
+        super().__init__(parent)
+
+        self.main_layout = QtW.QVBoxLayout()
+        self.button = QtW.QPushButton("Add Transition Table Entry")
+        self.main_layout.addWidget(self.button)
+        self.setLayout(self.main_layout)
+
+        self.callback = callback
+        self.button.clicked.connect(callback)
+
+
 @dataclasses.dataclass
 class Project:
     model: MultipleTurmiteModel = dataclasses.field(default_factory=MultipleTurmiteModel)
@@ -215,21 +227,42 @@ class Project:
 
 
 class StateWidget(QtW.QWidget):
-    def __init__(self, state: int, state_colors: StateColors):
+    def __init__(self, state: int, state_colors: StateColors, delete_callback, change_callback):
         super().__init__()
 
         self.state = state
         self.state_colors = state_colors
+        self.delete_callback = delete_callback
+        self.change_callback = change_callback
         self.display()
+
+    def contextMenuEvent(self, event: QtG.QContextMenuEvent) -> None:
+        menu = QtW.QMenu()
+        change_action = menu.addAction("Change Color")
+        delete_action = menu.addAction("Delete")
+
+        delete_action.triggered.connect(self.delete_callback)
+        change_action.triggered.connect(self.on_change)
+
+        menu.exec_(self.mapToGlobal(event.pos()))
+
+    def on_change(self):
+        color = QtW.QColorDialog.getColor()
+
+        if color.isValid():
+            self.change_callback(self.state, color)
 
     def display(self):
         main_layout = QtW.QHBoxLayout()
         label = QtW.QLabel(str(self.state))
+        # set label background to white
+        label.setStyleSheet("background-color: white")
 
         pm = get_pixmap(self.state_colors.get_color(self.state))
         color_label = QtW.QLabel()
         color_label.setPixmap(pm)
         color_label.setSizePolicy(QtW.QSizePolicy(QtW.QSizePolicy.Maximum, QtW.QSizePolicy.Maximum))
+        color_label.setStyleSheet("border: 1px solid black;")
 
         main_layout.addWidget(color_label)
         main_layout.addWidget(label)
@@ -270,6 +303,18 @@ class ProjectView:
         table.resizeRowsToContents()
         table.resizeColumnsToContents()
 
+    def draw_add_transition_table_entry(self):
+        row = self.ui.transitionTableTableWidget.rowCount()
+        self.ui.transitionTableTableWidget.insertRow(row)
+
+        self.ui.transitionTableTableWidget.setCellWidget(row, 0, AddListEntryButton(self.ui.transitionTableTableWidget,
+                                                                                    self.add_transition_table_entry))
+
+    def add_transition_table_entry(self):
+        self.current_turmite().transition_table
+
+        self.update_transition_table()
+
     def current_turmite(self):
         return self.project.model.turmites[self.ui.selectedTurmiteComboBox.currentIndex()]
 
@@ -298,16 +343,6 @@ class ProjectView:
                 turn_direction, new_cell_color, new_turmite_state
             )
 
-    def draw_add_transition_table_entry(self):
-        row = self.ui.transitionTableTableWidget.rowCount()
-        self.ui.transitionTableTableWidget.insertRow(row)
-        self.ui.transitionTableTableWidget.setCellWidget(row, 0, QtW.QLabel("Add new entry"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 1, QtW.QLabel("Add"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 2, QtW.QLabel("Add"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 3, QtW.QLabel("Add"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 4, QtW.QLabel("Add"))
-        # self.ui.transitionTableTableWidget.setCellWidget(row, 5, QtW.QLabel("Add"))
-
     def draw_turmites_combo_box(self):
         self.ui.selectedTurmiteComboBox.clear()
 
@@ -317,18 +352,30 @@ class ProjectView:
         self.ui.selectedTurmiteComboBox.currentIndexChanged.connect(self.draw_turmite_specific)
 
     def draw_state_table(self, table: QtW.QTableWidget, state_colors: StateColors, msg: str):
+        # palette = table.palette()
+        # palette.setBrush(QtG.QPalette.Base, QtG.QBrush(QtG.QColor(0, 0, 0), Qt.BDiagPattern))
+        # table.setPalette(palette)
+
+        table.clear()
         table.setRowCount(1)
         table.setColumnCount(len(state_colors.states) + 1)
 
-        col = 0
+        col = -1
         for col, state in enumerate(state_colors.states):
-            table.setCellWidget(0, col, StateWidget(state, state_colors))
+            table.setCellWidget(
+                0, col,
+                StateWidget(
+                    state, state_colors,
+                    lambda *_, __i=col: self.remove_state_color(table, state_colors, __i, msg),
+                    lambda state, color: self.set_state_color(table, state_colors, state, color, msg)
+                )
+            )
 
-        def callback(color: QtG.QColor):
+        def add_color_callback(color: QtG.QColor):
             new_state = state_colors.next_free_state()
             self.set_state_color(table, state_colors, new_state, color, msg)
 
-        add_state_widget = AddStateButton(table, msg, callback)
+        add_state_widget = AddStateButton(table, msg, add_color_callback)
         table.setCellWidget(0, col + 1, add_state_widget)
 
         self.setup_state_table(table)
@@ -337,13 +384,14 @@ class ProjectView:
                         color: QtG.QColor, msg: str):
         state_colors.set_color(state, color)
         self.draw_state_table(table, state_colors, msg)
+        self.draw_transition_table()
 
-    def remove_state_color(self, table: QtW.QTableWidget, state_colors: StateColors, state: StateColors.StateType,
-                           msg: str):
-        # check if state is used in transition table
+    def remove_state_color(self, table: QtW.QTableWidget, state_colors: StateColors, index: int, msg: str) -> None:
+        key = list(state_colors.states.keys())[index]
 
-        del state_colors.states[state]
+        del state_colors.states[key]
         self.draw_state_table(table, state_colors, msg)
+        self.draw_transition_table()
 
     @staticmethod
     def setup_state_table(table: QtW.QTableWidget):
@@ -450,7 +498,6 @@ def main(args: list[str]):
 
     app = QtW.QApplication(args)
     window = MainWindow(test_proj)
-    # window.draw_transition_table(test_model.turmites[0].transition_table)
     window.show()
     app.exec_()
 
