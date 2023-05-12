@@ -130,6 +130,8 @@ class AddStateButton(QtW.QWidget):
 
 
 class TurmitesGraphicsView:
+    _scale = 25
+
     def __init__(self, graphics_view: QtW.QGraphicsView, turmite_model: MultipleTurmiteModel,
                  cell_state_colors: StateColors, turmite_state_colors: list[StateColors]):
         self.turmite_model = turmite_model
@@ -163,7 +165,7 @@ class TurmitesGraphicsView:
             self.scene.removeItem(self.cell_graphics_items[position])
 
         self.cell_graphics_items[position] = self.scene.addRect(
-            QtC.QRectF(x * 10, y * 10, 10, 10),
+            QtC.QRectF(x * self._scale, y * self._scale, self._scale, self._scale),
             QtG.QPen(QtG.QColor(0, 0, 0)),
             QtG.QBrush(self.cell_state_colors.get_color(cell_state))
         )
@@ -178,7 +180,7 @@ class TurmitesGraphicsView:
             x, y = turmite.position
             self.turmite_graphics_items.append(
                 self.scene.addEllipse(
-                    x * 10, y * 10, 10, 10,
+                    x * self._scale, y * self._scale, self._scale, self._scale,
                     QtG.QPen(QtG.QColor(0, 0, 0), 1),
                     QtG.QBrush(state_colors.get_color(turmite.state))
                 )
@@ -430,6 +432,8 @@ class ProjectView:
         )
 
         self.ui.playToolButton.clicked.connect(self.start_simulation)
+        self.ui.fullStepToolButton.clicked.connect(self.full_step)
+        self.ui.stepOneTurmiteToolButton.clicked.connect(self.step_one_turmite)
 
     def save_project(self):
         file_path, *_ = QtW.QFileDialog.getSaveFileName(self.ui.centralwidget, "Save Project", "", "JSON (*.json)")
@@ -462,6 +466,14 @@ class ProjectView:
         for _ in range(self.ui.speedSpinBox.value()):
             self.project.model.step()
 
+        self.turmites_view.draw_turmites()
+
+    def step_one_turmite(self):
+        self.project.model.step_small()
+        self.turmites_view.draw_turmites()
+
+    def full_step(self):
+        self.project.model.step()
         self.turmites_view.draw_turmites()
 
 
