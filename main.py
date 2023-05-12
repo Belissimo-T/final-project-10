@@ -6,9 +6,10 @@ from pathlib import Path
 
 from PyQt5 import QtWidgets as QtW
 from PyQt5 import QtGui as QtG
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore as QtC
 
 from main_window import Ui_MainWindow
+from turmites.infinite_grid import Position
 from turmites.turmite import MultipleTurmiteModel, TurmiteState, CellColor
 
 
@@ -31,6 +32,12 @@ class StateColors:
     @classmethod
     def from_json(cls, data: dict) -> "StateColors":
         return cls({int(state): QtG.QColor(color) for state, color in data.items()})
+
+    def get_color(self, state: StateType) -> QtG.QColor:
+        return self.states[state]
+
+    def set_color(self, state: StateType, color: QtG.QColor):
+        self.states[state] = color
 
 
 def get_pixmap(color: QtG.QColor):
@@ -57,7 +64,7 @@ class StateComboBox(QtW.QWidget):
         self.main_layout.addWidget(self.combo_box)
         self.setLayout(self.main_layout)
 
-        self.state_mgr = state_colors
+        self.state_colors = state_colors
         self.display(state)
 
         self.combo_box.currentIndexChanged.connect(update_callback)
@@ -66,7 +73,7 @@ class StateComboBox(QtW.QWidget):
         target_state = target_state if target_state is not None else self.get_current_state()
 
         self.combo_box.clear()
-        for state, color in self.state_mgr.states.items():
+        for state, color in self.state_colors.states.items():
             icon = get_icon(color)
             self.combo_box.addItem(icon, str(state), state)
 
@@ -123,6 +130,68 @@ class AddStateButton(QtW.QWidget):
             self.callback(color)
 
 
+class TurmitesGraphicsView:
+    def __init__(self, graphics_view: QtW.QGraphicsView, turmite_model: MultipleTurmiteModel,
+                 cell_state_colors: StateColors, turmite_state_colors: list[StateColors]):
+        self.turmite_model = turmite_model
+        self.cell_state_colors = cell_state_colors
+        self.turmite_state_colors = turmite_state_colors
+
+        self.scene = QtW.QGraphicsScene()
+
+        self.view = graphics_view
+        self.view.setScene(self.scene)
+        self.view.setRenderHints(QtG.QPainter.Antialiasing | QtG.QPainter.SmoothPixmapTransform)
+        self.view.setDragMode(QtW.QGraphicsView.ScrollHandDrag)
+        self.view.setTransformationAnchor(QtW.QGraphicsView.AnchorUnderMouse)
+        self.view.setResizeAnchor(QtW.QGraphicsView.AnchorUnderMouse)
+        self.view.setMouseTracking(True)
+
+        self.view.scale(1, 1)
+
+        # on scroll, zoom in/out
+        self.view.wheelEvent = self.on_wheel_event
+
+        self.cell_graphics_items: dict[Position, QtW.QGraphicsItem] = {}
+        self.turmite_graphics_items: list[QtW.QGraphicsItem] = []
+
+        self.turmite_model.grid.listeners.append(self.update_cell)
+
+    def update_cell(self, position: Position, cell_state: int):
+        x, y = position
+
+        if position in self.cell_graphics_items:
+            self.scene.removeItem(self.cell_graphics_items[position])
+
+        self.cell_graphics_items[position] = self.scene.addRect(
+            QtC.QRectF(x * 10, y * 10, 10, 10),
+            QtG.QPen(QtG.QColor(0, 0, 0)),
+            QtG.QBrush(self.cell_state_colors.get_color(cell_state))
+        )
+
+    def draw_turmites(self):
+        for turmite_graphics_item in self.turmite_graphics_items:
+            self.scene.removeItem(turmite_graphics_item)
+
+        self.turmite_graphics_items.clear()
+
+        for turmite, state_colors in zip(self.turmite_model.turmites, self.turmite_state_colors):
+            x, y = turmite.position
+            self.turmite_graphics_items.append(
+                self.scene.addEllipse(
+                    x * 10, y * 10, 10, 10,
+                    QtG.QPen(QtG.QColor(0, 0, 0), 1),
+                    QtG.QBrush(state_colors.get_color(turmite.state))
+                )
+            )
+
+    def on_wheel_event(self, event: QtG.QWheelEvent):
+        if event.angleDelta().y() > 0:
+            self.view.scale(1.1, 1.1)
+        else:
+            self.view.scale(0.9, 0.9)
+
+
 @dataclasses.dataclass
 class Project:
     model: MultipleTurmiteModel = dataclasses.field(default_factory=MultipleTurmiteModel)
@@ -133,7 +202,7 @@ class Project:
         return {
             "model": self.model.to_json(),
             "cell_state_colors": self.cell_state_colors.to_json(),
-            "turmite_state_colors": [mgr.to_json() for mgr in self.turmite_state_colors]
+            "turmite_state_colors": [colors.to_json() for colors in self.turmite_state_colors]
         }
 
     @classmethod
@@ -141,23 +210,23 @@ class Project:
         return cls(
             MultipleTurmiteModel.from_json(data["model"]),
             StateColors.from_json(data["cell_state_colors"]),
-            [StateColors.from_json(mgr) for mgr in data["turmite_state_colors"]]
+            [StateColors.from_json(colors) for colors in data["turmite_state_colors"]]
         )
 
 
 class StateWidget(QtW.QWidget):
-    def __init__(self, state: int, mgr: StateColors):
+    def __init__(self, state: int, state_colors: StateColors):
         super().__init__()
 
         self.state = state
-        self.mgr = mgr
+        self.state_colors = state_colors
         self.display()
 
     def display(self):
         main_layout = QtW.QHBoxLayout()
         label = QtW.QLabel(str(self.state))
 
-        pm = get_pixmap(self.mgr.states[self.state])
+        pm = get_pixmap(self.state_colors.get_color(self.state))
         color_label = QtW.QLabel()
         color_label.setPixmap(pm)
         color_label.setSizePolicy(QtW.QSizePolicy(QtW.QSizePolicy.Maximum, QtW.QSizePolicy.Maximum))
@@ -171,6 +240,10 @@ class ProjectView:
     def __init__(self, project: Project, ui: Ui_MainWindow):
         self.project = project
         self.ui = ui
+
+        self.tick_timer = QtC.QTimer()
+        self.tick_timer.timeout.connect(self.tick)
+        self.tick_timer.setInterval(int(1 / 60 * 1000))
 
     def draw_transition_table(self):
         table = self.ui.transitionTableTableWidget
@@ -262,7 +335,14 @@ class ProjectView:
 
     def set_state_color(self, table: QtW.QTableWidget, state_colors: StateColors, state: StateColors.StateType,
                         color: QtG.QColor, msg: str):
-        state_colors.states[state] = color
+        state_colors.set_color(state, color)
+        self.draw_state_table(table, state_colors, msg)
+
+    def remove_state_color(self, table: QtW.QTableWidget, state_colors: StateColors, state: StateColors.StateType,
+                           msg: str):
+        # check if state is used in transition table
+
+        del state_colors.states[state]
         self.draw_state_table(table, state_colors, msg)
 
     @staticmethod
@@ -270,8 +350,8 @@ class ProjectView:
         table.verticalHeader().setSectionResizeMode(QtW.QHeaderView.ResizeToContents)
         table.horizontalHeader().setSectionResizeMode(QtW.QHeaderView.ResizeToContents)
 
-        table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        table.setVerticalScrollBarPolicy(QtC.Qt.ScrollBarAlwaysOff)
+        table.setHorizontalScrollBarPolicy(QtC.Qt.ScrollBarAlwaysOn)
 
         table.resizeColumnsToContents()
         table.resizeRowsToContents()
@@ -294,9 +374,16 @@ class ProjectView:
 
         self.ui.actionSaveProject.triggered.connect(self.save_project)
 
-    def save_project(self):
-        # open qt file dialog with default suffix .json
+        self.turmites_view = TurmitesGraphicsView(
+            self.ui.simulationView,
+            self.project.model,
+            self.project.cell_state_colors,
+            self.project.turmite_state_colors
+        )
 
+        self.ui.playToolButton.clicked.connect(self.start_simulation)
+
+    def save_project(self):
         file_path, *_ = QtW.QFileDialog.getSaveFileName(self.ui.centralwidget, "Save Project", "", "JSON (*.json)")
 
         if not file_path:
@@ -310,6 +397,24 @@ class ProjectView:
     def draw_turmite_specific(self):
         self.draw_transition_table()
         self.draw_state_table(self.ui.turmiteStatesTableWidget, self.current_turmite_colors(), "Add Turmite State")
+
+    def start_simulation(self):
+        self.ui.playToolButton.clicked.connect(self.stop_simulation)
+        self.ui.playToolButton.clicked.disconnect(self.start_simulation)
+        self.tick_timer.start()
+        self.ui.playToolButton.setText("Stop")
+
+    def stop_simulation(self):
+        self.ui.playToolButton.clicked.connect(self.start_simulation)
+        self.ui.playToolButton.clicked.disconnect(self.stop_simulation)
+        self.tick_timer.stop()
+        self.ui.playToolButton.setText("Start")
+
+    def tick(self):
+        for _ in range(self.ui.speedSpinBox.value()):
+            self.project.model.step()
+
+        self.turmites_view.draw_turmites()
 
 
 class MainWindow(QtW.QMainWindow, Ui_MainWindow):
@@ -340,7 +445,7 @@ class MainWindow(QtW.QMainWindow, Ui_MainWindow):
 
 
 def main(args: list[str]):
-    with open("test_project.json", "r", encoding="utf-8") as f:
+    with open("test_project_langtons_ant.json", "r", encoding="utf-8") as f:
         test_proj = Project.from_json(json.load(f))
 
     app = QtW.QApplication(args)

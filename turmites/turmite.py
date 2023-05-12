@@ -52,6 +52,12 @@ class TransitionTable:
     def invert_direction(self) -> TransitionTable:
         return TransitionTable({key: (-value[0], value[1], value[2]) for key, value in self._transition_dict.items()})
 
+    def contains_cell_state(self, cell_state: CellColor) -> bool:
+        return any(key[0] == cell_state for key in self._transition_dict.keys())
+
+    def contains_turmite_state(self, turmite_state: TurmiteState) -> bool:
+        return any(key[1] == turmite_state for key in self._transition_dict.keys())
+
     def __iter__(self):
         return iter(self._transition_dict.items())
 
@@ -111,7 +117,7 @@ class Turmite:
     def from_json(cls, data: dict) -> "Turmite":
         return cls(
             TransitionTable.from_json(data["transition_table"]),
-            data["position"],
+            tuple(data["position"]),
             data["direction"],
             data["state"]
         )

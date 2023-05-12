@@ -30,5 +30,23 @@ def main():
         json.dump(data, f, indent=2)
 
 
+def langtons_ant_project():
+    turmite = Turmite(
+        langtons_ant_transition_table
+    )
+
+    model = MultipleTurmiteModel([turmite])
+    p = Project(
+        model,
+        StateColors({0: QtG.QColor(0xFF_000000), 1: QtG.QColor(0xFF_FFFFFF)}),
+        [StateColors({0: QtG.QColor(0xFF_00FF00)})] * 2
+    )
+    data = p.to_json()
+
+    with open("test_project_langtons_ant.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
 if __name__ == "__main__":
+    langtons_ant_project()
     main()
