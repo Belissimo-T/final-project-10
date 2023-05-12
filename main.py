@@ -139,6 +139,7 @@ class TurmitesGraphicsView:
         self.turmite_state_colors = turmite_state_colors
 
         self.scene = QtW.QGraphicsScene()
+        self.scene.setBackgroundBrush(cell_state_colors.get_color(turmite_model.grid.default))
 
         self.view = graphics_view
         self.view.setScene(self.scene)
@@ -156,6 +157,8 @@ class TurmitesGraphicsView:
         self.cell_graphics_items: dict[Position, QtW.QGraphicsItem] = {}
         self.turmite_graphics_items: list[QtW.QGraphicsItem] = []
 
+        self.init_grid()
+        self.draw_turmites()
         self.turmite_model.grid.listeners.append(self.update_cell)
 
     def update_cell(self, position: Position, cell_state: int):
@@ -185,6 +188,12 @@ class TurmitesGraphicsView:
                     QtG.QBrush(state_colors.get_color(turmite.state))
                 )
             )
+
+    def init_grid(self):
+        self.cell_graphics_items: dict[Position, QtW.QGraphicsItem] = {}
+
+        for position, cell_state in self.turmite_model.grid.items():
+            self.update_cell(position, cell_state)
 
     def on_wheel_event(self, event: QtG.QWheelEvent):
         if event.angleDelta().y() > 0:
@@ -432,8 +441,11 @@ class ProjectView:
         )
 
         self.ui.playToolButton.clicked.connect(self.start_simulation)
+        self.ui.actionPlay.triggered.connect(self.start_simulation)
         self.ui.fullStepToolButton.clicked.connect(self.full_step)
+        self.ui.actionFullStep.triggered.connect(self.full_step)
         self.ui.stepOneTurmiteToolButton.clicked.connect(self.step_one_turmite)
+        self.ui.actionStepOneTurmite.triggered.connect(self.step_one_turmite)
 
     def save_project(self):
         file_path, *_ = QtW.QFileDialog.getSaveFileName(self.ui.centralwidget, "Save Project", "", "JSON (*.json)")
@@ -453,14 +465,20 @@ class ProjectView:
     def start_simulation(self):
         self.ui.playToolButton.clicked.connect(self.stop_simulation)
         self.ui.playToolButton.clicked.disconnect(self.start_simulation)
+        self.ui.actionPlay.triggered.connect(self.stop_simulation)
+        self.ui.actionPlay.triggered.disconnect(self.start_simulation)
         self.tick_timer.start()
         self.ui.playToolButton.setText("Stop")
+        self.ui.actionPlay.setText("Stop")
 
     def stop_simulation(self):
         self.ui.playToolButton.clicked.connect(self.start_simulation)
         self.ui.playToolButton.clicked.disconnect(self.stop_simulation)
+        self.ui.actionPlay.triggered.connect(self.start_simulation)
+        self.ui.actionPlay.triggered.disconnect(self.stop_simulation)
         self.tick_timer.stop()
         self.ui.playToolButton.setText("Start")
+        self.ui.actionPlay.setText("Start")
 
     def tick(self):
         for _ in range(self.ui.speedSpinBox.value()):
@@ -478,7 +496,6 @@ class ProjectView:
 
 
 class MainWindow(QtW.QMainWindow, Ui_MainWindow):
-
     def __init__(self, project: Project = None):
         super().__init__()
         self.setupUi(self)

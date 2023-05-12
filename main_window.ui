@@ -109,14 +109,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="FullStepToolButton">
+        <widget class="QToolButton" name="fullStepToolButton">
          <property name="text">
           <string>Full Step</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="StepOneTurmiteToolButton">
+        <widget class="QToolButton" name="stepOneTurmiteToolButton">
          <property name="text">
           <string>Step one turmite</string>
          </property>
@@ -546,7 +546,7 @@
      <x>0</x>
      <y>0</y>
      <width>1205</width>
-     <height>30</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

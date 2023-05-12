@@ -12,7 +12,7 @@ def main():
     turmite2 = Turmite(
         langtons_ant_transition_table.invert_direction()
     )
-    turmite2.position = 100, 100
+    turmite.position = 100, 100
 
     model = MultipleTurmiteModel([turmite, turmite2])
     for _ in range(15_000):
@@ -20,7 +20,7 @@ def main():
 
     p = Project(
         model,
-        StateColors({0: QtG.QColor(0xFF_000000), 1: QtG.QColor(0xFF_FFFFFF)}),
+        StateColors({1: QtG.QColor(0xFF_000000), 0: QtG.QColor(0xFF_FFFFFF)}),
         [StateColors({0: QtG.QColor(0xFF_00FF00)})] * 2
     )
     data = p.to_json()
@@ -37,7 +37,7 @@ def langtons_ant_project():
     model = MultipleTurmiteModel([turmite])
     p = Project(
         model,
-        StateColors({0: QtG.QColor(0xFF_000000), 1: QtG.QColor(0xFF_FFFFFF)}),
+        StateColors({1: QtG.QColor(0xFF_000000), 0: QtG.QColor(0xFF_FFFFFF)}),
         [StateColors({0: QtG.QColor(0xFF_00FF00)})] * 2
     )
     data = p.to_json()

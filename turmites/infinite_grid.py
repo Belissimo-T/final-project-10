@@ -10,7 +10,7 @@ T = typing.TypeVar("T")
 class InfiniteGrid(typing.Generic[T]):
     def __init__(self, default: T, _grid: dict[Position, T] = None):
         self._grid: dict[Position, T] = {} if _grid is None else _grid
-        self._default = default
+        self.default = default
         self.listeners: list[typing.Callable[[Position, T], None]] = []
 
     def _call_listeners(self, key: Position, value: T):
@@ -18,7 +18,7 @@ class InfiniteGrid(typing.Generic[T]):
             grid_listener(key, value)
 
     def __setitem__(self, key: Position, value: T):
-        if value == self._default:
+        if value == self.default:
             self._grid.pop(key, None)
         else:
             self._grid[key] = value
@@ -26,15 +26,19 @@ class InfiniteGrid(typing.Generic[T]):
         self._call_listeners(key, value)
 
     def __getitem__(self, item: Position):
-        return self._grid.get(item, self._default)
+        return self._grid.get(item, self.default)
 
     def __len__(self):
         return len(self._grid)
 
+    def items(self):
+        for key, value in self._grid.items():
+            yield key, value
+
     def to_json(self) -> dict:
         return {
             "grid": [[";".join(map(str, key)), value] for key, value in self._grid.items()],
-            "default": self._default
+            "default": self.default
         }
 
     @classmethod
