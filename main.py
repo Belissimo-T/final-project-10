@@ -159,6 +159,7 @@ class TurmitesGraphicsView:
         self.init_grid()
         self.draw_turmites()
         self.turmite_model.grid.listeners.append(self.update_cell)
+        # self.view.eventFilter = self.graphics_view_event_filter
 
     def update_cell(self, position: Position, cell_state: int):
         x, y = position
@@ -207,6 +208,53 @@ class TurmitesGraphicsView:
             self.view.scale(1.1, 1.1)
         else:
             self.view.scale(0.9, 0.9)
+    """
+    
+    bool MyGraphicsView::eventFilter(QObject *object, QEvent *event) {
+     
+      if (event->type() == QEvent::MouseButtonPress)
+      {
+          QMouseEvent* mouse_event = static_cast<QMouseEvent*>(event);
+          // Enter here any button you like
+          if (mouse_event->button() == Qt::MiddleButton)
+          {
+              // temporarly enable dragging mode
+              this->setDragMode(QGraphicsView::DragMode::ScrollHandDrag);
+              // emit a left mouse click (the default button for the drag mode)
+              QMouseEvent* pressEvent = new QMouseEvent(QEvent::GraphicsSceneMousePress, 
+                                        mouse_event->pos(), Qt::MouseButton::LeftButton,
+                                        Qt::MouseButton::LeftButton, Qt::KeyboardModifier::NoModifier);
+              
+              this->mousePressEvent(pressEvent);
+          }
+          else if (event->type() == QEvent::MouseButtonRelease)
+          {
+              // disable drag mode if dragging is finished
+              this->setDragMode(QGraphicsView::DragMode::NoDrag);
+          }
+          
+          Q_UNUSED(object)
+          return false;
+    }"""
+
+    @staticmethod
+    def graphics_view_event_filter(self: QtW.QGraphicsView, obj, event: QtC.QEvent):
+        if event.type() == QtC.QEvent.MouseButtonPress:
+            event: QtG.QMouseEvent
+
+            if event.button() == QtC.Qt.MouseButton.RightButton:
+                self.setDragMode(QtW.QGraphicsView.DragMode.ScrollHandDrag)
+
+                press_event = QtG.QMouseEvent(
+                    QtC.QEvent.GraphicsSceneMousePress,
+                    event.pos(),
+                    QtC.Qt.MouseButton.LeftButton,
+                    QtC.Qt.KeyboardModifier.NoModifier
+                )
+                self.mousePressEvent(press_event)
+
+        elif event.type() == QtC.QEvent.MouseButtonRelease:
+            ...
 
 
 class AddListEntryButton(QtW.QWidget):
@@ -517,6 +565,7 @@ class MainWindow(QtW.QMainWindow, Ui_MainWindow):
         self.set_project(project)
 
         self.actionOpen.triggered.connect(self.open_project)
+        self.actionQuit.triggered.connect(self.close)
 
     def open_project(self):
         file_path, *_ = QtW.QFileDialog.getOpenFileName(self, "Open Project", "", "JSON (*.json)")
@@ -532,6 +581,18 @@ class MainWindow(QtW.QMainWindow, Ui_MainWindow):
     def set_project(self, project: Project):
         self.project_view = ProjectView(project, self)
         self.project_view.init()
+
+    def closeEvent(self, close_event: QtG.QCloseEvent) -> None:
+        msg_box = QtW.QMessageBox()
+        msg_box.setIcon(QtW.QMessageBox.Warning)
+        msg_box.setWindowTitle("Quit")
+        msg_box.setText("All unsaved changes will be lost.")
+        msg_box.setStandardButtons(QtW.QMessageBox.Ok | QtW.QMessageBox.Cancel)
+
+        if msg_box.exec() == QtW.QMessageBox.Ok:
+            close_event.accept()
+        else:
+            close_event.ignore()
 
 
 def main(args: list[str]):
