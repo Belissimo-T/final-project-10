@@ -1,3 +1,4 @@
+import copy
 import dataclasses
 import json
 import sys
@@ -133,10 +134,12 @@ class TurmitesGraphicsView:
     _scale = 25
 
     def __init__(self, graphics_view: QtW.QGraphicsView, turmite_model: MultipleTurmiteModel,
-                 cell_state_colors: StateColors, turmite_state_colors: list[StateColors]):
+                 cell_state_colors: StateColors, turmite_state_colors: list[StateColors],
+                 project_view: "ProjectView"):
         self.turmite_model = turmite_model
         self.cell_state_colors = cell_state_colors
         self.turmite_state_colors = turmite_state_colors
+        self.project_view = project_view
 
         self.scene = QtW.QGraphicsScene()
 
@@ -159,6 +162,9 @@ class TurmitesGraphicsView:
         self.init_grid()
         self.draw_turmites()
         self.turmite_model.grid.listeners.append(self.update_cell)
+
+        self.scene.mousePressEvent = self.scene_mouse_press_event
+
         # self.view.eventFilter = self.graphics_view_event_filter
 
     def update_cell(self, position: Position, cell_state: int):
@@ -166,6 +172,7 @@ class TurmitesGraphicsView:
 
         if position in self.cell_graphics_items:
             self.scene.removeItem(self.cell_graphics_items[position])
+            del self.cell_graphics_items[position]
 
         if cell_state == self.turmite_model.grid.default:
             return
@@ -216,6 +223,42 @@ class TurmitesGraphicsView:
             self.view.scale(1.1, 1.1)
         else:
             self.view.scale(0.9, 0.9)
+
+    def scene_mouse_press_event(self, event):
+        if event.button() != QtC.Qt.RightButton:
+            return
+
+        x = event.scenePos().x()
+        y = event.scenePos().y()
+        if self.project_view.ui.paintToolButton.isChecked():
+            selected_states = self.project_view.ui.cellStatesTableWidget.selectedIndexes()
+            if not selected_states:
+                msg_box = QtW.QMessageBox()
+                msg_box.setText("No cell state selected. Select a cell state in the lower right table to paint.")
+                msg_box.setIcon(QtW.QMessageBox.Critical)
+                msg_box.exec()
+                return
+
+            selected_state = self.project_view.ui.cellStatesTableWidget.cellWidget(0, selected_states[0].column()).state
+            self.turmite_model.grid[x // self._scale, y // self._scale] = selected_state
+            self.draw_turmites()
+
+        elif self.project_view.ui.placeToolButton.isChecked():
+            curr_t_i = self.project_view.ui.selectedTurmiteComboBox.currentIndex()
+            new_turmite = copy.deepcopy(self.turmite_model.turmites[curr_t_i])
+            new_state_colors = copy.deepcopy(self.turmite_state_colors[curr_t_i])
+
+            new_turmite.position = x // self._scale, y // self._scale
+
+            self.turmite_model.turmites.append(new_turmite)
+            self.turmite_state_colors.append(new_state_colors)
+
+            self.project_view.draw_turmites_combo_box()
+            self.project_view.ui.selectedTurmiteComboBox.setCurrentIndex(len(self.turmite_model.turmites) - 1)
+            self.project_view.draw_turmite_specific()
+
+            self.draw_turmites()
+
     # """
     #
     # bool MyGraphicsView::eventFilter(QObject *object, QEvent *event) {
@@ -422,7 +465,7 @@ class ProjectView:
         self.ui.selectedTurmiteComboBox.clear()
 
         for i, turmite in enumerate(self.project.model.turmites):
-            self.ui.selectedTurmiteComboBox.addItem(f"Turmite #{i + 1}")
+            self.ui.selectedTurmiteComboBox.addItem(f"#{i + 1}")
 
         self.ui.selectedTurmiteComboBox.currentIndexChanged.connect(self.draw_turmite_specific)
 
@@ -507,7 +550,8 @@ class ProjectView:
             self.ui.simulationView,
             self.project.model,
             self.project.cell_state_colors,
-            self.project.turmite_state_colors
+            self.project.turmite_state_colors,
+            self
         )
 
         self.ui.playToolButton.clicked.connect(self.start_simulation)
@@ -573,8 +617,10 @@ class ProjectView:
             return
 
         curr_t_i = self.ui.selectedTurmiteComboBox.currentIndex()
-        self.project.model.turmites[curr_t_i], self.project.model.turmites[curr_t_i - 1] = self.project.model.turmites[
-            curr_t_i - 1], self.project.model.turmites[curr_t_i]
+        self.project.model.turmites[curr_t_i], self.project.model.turmites[curr_t_i - 1] = \
+            self.project.model.turmites[curr_t_i - 1], self.project.model.turmites[curr_t_i]
+        self.project.turmite_state_colors[curr_t_i], self.project.turmite_state_colors[curr_t_i - 1] = \
+            self.project.turmite_state_colors[curr_t_i - 1], self.project.turmite_state_colors[curr_t_i]
         self.ui.selectedTurmiteComboBox.setCurrentIndex(curr_t_i - 1)
         self.turmites_view.draw_turmites()
         self.draw_turmite_specific()
@@ -584,8 +630,10 @@ class ProjectView:
             return
 
         curr_t_i = self.ui.selectedTurmiteComboBox.currentIndex()
-        self.project.model.turmites[curr_t_i], self.project.model.turmites[curr_t_i + 1] = self.project.model.turmites[
-            curr_t_i + 1], self.project.model.turmites[curr_t_i]
+        self.project.model.turmites[curr_t_i], self.project.model.turmites[curr_t_i + 1] = \
+            self.project.model.turmites[curr_t_i + 1], self.project.model.turmites[curr_t_i]
+        self.project.turmite_state_colors[curr_t_i], self.project.turmite_state_colors[curr_t_i + 1] = \
+            self.project.turmite_state_colors[curr_t_i + 1], self.project.turmite_state_colors[curr_t_i]
         self.ui.selectedTurmiteComboBox.setCurrentIndex(curr_t_i + 1)
         self.turmites_view.draw_turmites()
         self.draw_turmite_specific()

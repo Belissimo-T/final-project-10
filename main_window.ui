@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1205</width>
-    <height>946</height>
+    <height>948</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -151,12 +151,12 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QToolButton" name="selectToolButton">
+           <widget class="QToolButton" name="paintToolButton">
             <property name="toolTip">
-             <string>select Turmites by right-clicking</string>
+             <string>change a cell's state to the currently selected one by right-clicking</string>
             </property>
             <property name="text">
-             <string>Select</string>
+             <string>Paint</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -170,28 +170,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="toolButton">
+           <widget class="QToolButton" name="placeToolButton">
             <property name="toolTip">
-             <string>place a Turmite by right-clicking</string>
+             <string>duplicate the currently selected Turmite and place it by right-clicking</string>
             </property>
             <property name="text">
              <string>Place</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">inputControlButtonGroup</string>
-            </attribute>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="paintToolButton">
-            <property name="toolTip">
-             <string>change a cell's state to the currently selected one by right-clicking</string>
-            </property>
-            <property name="text">
-             <string>Paint</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
