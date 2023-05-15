@@ -1,0 +1,8 @@
+- [ ] Add a turmite
+- [X] reorder turmites
+- [ ] painting
+- [ ] select a turmite
+- [ ] add a rule
+- [ ] check rules
+- [ ] display blickrichtung
+- [X] display number

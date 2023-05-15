@@ -182,7 +182,7 @@ class TurmitesGraphicsView:
 
         self.turmite_graphics_items.clear()
 
-        for turmite, state_colors in zip(self.turmite_model.turmites, self.turmite_state_colors):
+        for i, (turmite, state_colors) in enumerate(zip(self.turmite_model.turmites, self.turmite_state_colors)):
             x, y = turmite.position
             self.turmite_graphics_items.append(
                 self.scene.addEllipse(
@@ -191,6 +191,14 @@ class TurmitesGraphicsView:
                     QtG.QBrush(state_colors.get_color(turmite.state))
                 )
             )
+            text = QtW.QGraphicsTextItem(
+                f"#{i + 1}",
+                self.turmite_graphics_items[-1],
+            )
+            text.setPos(x * self._scale, y * self._scale)
+            text.setDefaultTextColor(QtG.QColor(0, 0, 0))
+            # self.scene.addItem(text)
+            self.turmite_graphics_items.append(text)
 
     def init_grid(self):
         self.scene.setBackgroundBrush(self.cell_state_colors.get_color(self.turmite_model.grid.default))
@@ -208,53 +216,54 @@ class TurmitesGraphicsView:
             self.view.scale(1.1, 1.1)
         else:
             self.view.scale(0.9, 0.9)
-    """
-    
-    bool MyGraphicsView::eventFilter(QObject *object, QEvent *event) {
-     
-      if (event->type() == QEvent::MouseButtonPress)
-      {
-          QMouseEvent* mouse_event = static_cast<QMouseEvent*>(event);
-          // Enter here any button you like
-          if (mouse_event->button() == Qt::MiddleButton)
-          {
-              // temporarly enable dragging mode
-              this->setDragMode(QGraphicsView::DragMode::ScrollHandDrag);
-              // emit a left mouse click (the default button for the drag mode)
-              QMouseEvent* pressEvent = new QMouseEvent(QEvent::GraphicsSceneMousePress, 
-                                        mouse_event->pos(), Qt::MouseButton::LeftButton,
-                                        Qt::MouseButton::LeftButton, Qt::KeyboardModifier::NoModifier);
-              
-              this->mousePressEvent(pressEvent);
-          }
-          else if (event->type() == QEvent::MouseButtonRelease)
-          {
-              // disable drag mode if dragging is finished
-              this->setDragMode(QGraphicsView::DragMode::NoDrag);
-          }
-          
-          Q_UNUSED(object)
-          return false;
-    }"""
-
-    @staticmethod
-    def graphics_view_event_filter(self: QtW.QGraphicsView, obj, event: QtC.QEvent):
-        if event.type() == QtC.QEvent.MouseButtonPress:
-            event: QtG.QMouseEvent
-
-            if event.button() == QtC.Qt.MouseButton.RightButton:
-                self.setDragMode(QtW.QGraphicsView.DragMode.ScrollHandDrag)
-
-                press_event = QtG.QMouseEvent(
-                    QtC.QEvent.GraphicsSceneMousePress,
-                    event.pos(),
-                    QtC.Qt.MouseButton.LeftButton,
-                    QtC.Qt.KeyboardModifier.NoModifier
-                )
-                self.mousePressEvent(press_event)
-
-        elif event.type() == QtC.QEvent.MouseButtonRelease:
-            ...
+    # """
+    #
+    # bool MyGraphicsView::eventFilter(QObject *object, QEvent *event) {
+    #
+    #   if (event->type() == QEvent::MouseButtonPress)
+    #   {
+    #       QMouseEvent* mouse_event = static_cast<QMouseEvent*>(event);
+    #       // Enter here any button you like
+    #       if (mouse_event->button() == Qt::MiddleButton)
+    #       {
+    #           // temporarly enable dragging mode
+    #           this->setDragMode(QGraphicsView::DragMode::ScrollHandDrag);
+    #           // emit a left mouse click (the default button for the drag mode)
+    #           QMouseEvent* pressEvent = new QMouseEvent(QEvent::GraphicsSceneMousePress,
+    #                                     mouse_event->pos(), Qt::MouseButton::LeftButton,
+    #                                     Qt::MouseButton::LeftButton, Qt::KeyboardModifier::NoModifier);
+    #
+    #           this->mousePressEvent(pressEvent);
+    #       }
+    #       else if (event->type() == QEvent::MouseButtonRelease)
+    #       {
+    #           // disable drag mode if dragging is finished
+    #           this->setDragMode(QGraphicsView::DragMode::NoDrag);
+    #       }
+    #
+    #       Q_UNUSED(object)
+    #       return false;
+    # }"""
+    #
+    # @staticmethod
+    # def graphics_view_event_filter(self: QtW.QGraphicsView, obj, event: QtC.QEvent):
+    #     if event.type() == QtC.QEvent.MouseButtonPress:
+    #         event: QtG.QMouseEvent
+    #
+    #         if event.button() == QtC.Qt.MouseButton.RightButton:
+    #             self.setDragMode(QtW.QGraphicsView.DragMode.ScrollHandDrag)
+    #
+    #             press_event = QtG.QMouseEvent(
+    #                 QtC.QEvent.GraphicsSceneMousePress,
+    #                 event.pos(),
+    #                 QtC.Qt.MouseButton.LeftButton,
+    #                 QtC.Qt.KeyboardModifier.NoModifier
+    #             )
+    #             self.mousePressEvent(press_event)
+    #
+    #     elif event.type() == QtC.QEvent.MouseButtonRelease:
+    #         ...
+    #
 
 
 class AddListEntryButton(QtW.QWidget):
@@ -507,6 +516,8 @@ class ProjectView:
         self.ui.actionFullStep.triggered.connect(self.full_step)
         self.ui.stepOneTurmiteToolButton.clicked.connect(self.step_one_turmite)
         self.ui.actionStepOneTurmite.triggered.connect(self.step_one_turmite)
+        self.ui.reorderUpToolButton.clicked.connect(self.reorder_up)
+        self.ui.reorderDownToolButton.clicked.connect(self.reorder_down)
 
     def save_project(self):
         file_path, *_ = QtW.QFileDialog.getSaveFileName(self.ui.centralwidget, "Save Project", "", "JSON (*.json)")
@@ -550,10 +561,34 @@ class ProjectView:
     def step_one_turmite(self):
         self.project.model.step_small()
         self.turmites_view.draw_turmites()
+        self.ui.selectedTurmiteComboBox.setCurrentIndex(self.project.model.small_step)
+        self.draw_turmite_specific()
 
     def full_step(self):
         self.project.model.step()
         self.turmites_view.draw_turmites()
+
+    def reorder_up(self):
+        if self.ui.selectedTurmiteComboBox.currentIndex() == 0:
+            return
+
+        curr_t_i = self.ui.selectedTurmiteComboBox.currentIndex()
+        self.project.model.turmites[curr_t_i], self.project.model.turmites[curr_t_i - 1] = self.project.model.turmites[
+            curr_t_i - 1], self.project.model.turmites[curr_t_i]
+        self.ui.selectedTurmiteComboBox.setCurrentIndex(curr_t_i - 1)
+        self.turmites_view.draw_turmites()
+        self.draw_turmite_specific()
+
+    def reorder_down(self):
+        if self.ui.selectedTurmiteComboBox.currentIndex() == len(self.project.model.turmites) - 1:
+            return
+
+        curr_t_i = self.ui.selectedTurmiteComboBox.currentIndex()
+        self.project.model.turmites[curr_t_i], self.project.model.turmites[curr_t_i + 1] = self.project.model.turmites[
+            curr_t_i + 1], self.project.model.turmites[curr_t_i]
+        self.ui.selectedTurmiteComboBox.setCurrentIndex(curr_t_i + 1)
+        self.turmites_view.draw_turmites()
+        self.draw_turmite_specific()
 
 
 class MainWindow(QtW.QMainWindow, Ui_MainWindow):
