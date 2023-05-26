@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import dataclasses
 import json
@@ -57,7 +59,7 @@ def get_icon(color: QtG.QColor):
 
 
 class StateComboBox(QtW.QWidget):
-    def __init__(self, state: StateColors.StateType, state_colors: StateColors, update_callback):
+    def __init__(self, state: StateColors.StateType | None, state_colors: StateColors, update_callback):
         super().__init__()
 
         self.main_layout = QtW.QVBoxLayout()
@@ -71,14 +73,15 @@ class StateComboBox(QtW.QWidget):
         self.combo_box.currentIndexChanged.connect(update_callback)
 
     def display(self, target_state: StateColors.StateType = None):
-        target_state = target_state if target_state is not None else self.get_current_state()
+        # target_state = target_state if target_state is not None else self.get_current_state()
 
         self.combo_box.clear()
         for state, color in self.state_colors.states.items():
             icon = get_icon(color)
             self.combo_box.addItem(icon, str(state), state)
 
-        self.combo_box.setCurrentIndex(self.combo_box.findData(target_state))
+        if target_state is not None:
+            self.combo_box.setCurrentIndex(self.combo_box.findData(target_state))
 
     def get_current_state(self) -> StateColors.StateType:
         return self.combo_box.currentData()
@@ -92,7 +95,7 @@ class TurnDirectionComboBox(QtW.QWidget):
         3: "Turn right",
     }
 
-    def __init__(self, turn_direction: int, update_callback):
+    def __init__(self, turn_direction: int | None, update_callback):
         super().__init__()
 
         self.main_layout = QtW.QHBoxLayout()
@@ -103,7 +106,8 @@ class TurnDirectionComboBox(QtW.QWidget):
         for direction, msg in self.TURN_DIRECTIONS.items():
             self.combo_box.addItem(msg, direction)
 
-        self.combo_box.setCurrentIndex(self.combo_box.findData(turn_direction % 4))
+        if turn_direction is not None:
+            self.combo_box.setCurrentIndex(self.combo_box.findData(turn_direction % 4))
 
         self.combo_box.currentIndexChanged.connect(update_callback)
 
@@ -322,6 +326,19 @@ class AddListEntryButton(QtW.QWidget):
         self.button.clicked.connect(callback)
 
 
+class RemoveListEntryButton(QtW.QWidget):
+    def __init__(self, parent, callback):
+        super().__init__(parent)
+
+        self.main_layout = QtW.QHBoxLayout()
+        self.button = QtW.QPushButton("Remove")
+        self.main_layout.addWidget(self.button)
+        self.setLayout(self.main_layout)
+
+        self.callback = callback
+        self.button.clicked.connect(callback)
+
+
 @dataclasses.dataclass
 class Project:
     model: MultipleTurmiteModel = dataclasses.field(default_factory=MultipleTurmiteModel)
@@ -415,6 +432,8 @@ class ProjectView:
             table.setCellWidget(row, 2, TurnDirectionComboBox(turn_direction, update_callback))
             table.setCellWidget(row, 3, StateComboBox(new_cell_color, self.project.cell_state_colors, update_callback))
             table.setCellWidget(row, 4, StateComboBox(new_turmite_state, state_colors, update_callback))
+            table.setCellWidget(row, 5,
+                                RemoveListEntryButton(table, lambda _row=row: self.remove_transition_table_entry(_row)))
 
         self.draw_add_transition_table_entry()
 
@@ -429,9 +448,29 @@ class ProjectView:
                                                                                     self.add_transition_table_entry))
 
     def add_transition_table_entry(self):
-        self.current_turmite().transition_table
+        table = self.ui.transitionTableTableWidget
 
+        turmite = self.current_turmite()
+        state_colors = self.current_turmite_colors()
+
+        row = table.rowCount() - 1
+        update_callback = lambda *_: self.update_transition_table()
+
+        table.setCellWidget(row, 0, StateComboBox(None, self.project.cell_state_colors, update_callback))
+        table.setCellWidget(row, 1, StateComboBox(None, state_colors, update_callback))
+        table.setCellWidget(row, 2, TurnDirectionComboBox(None, update_callback))
+        table.setCellWidget(row, 3, StateComboBox(None, self.project.cell_state_colors, update_callback))
+        table.setCellWidget(row, 4, StateComboBox(None, state_colors, update_callback))
+        table.setCellWidget(row, 5, RemoveListEntryButton(table, lambda _row=row: self.remove_transition_table_entry(_row)))
+
+        self.draw_add_transition_table_entry()
+
+        table.resizeRowsToContents()
+
+    def remove_transition_table_entry(self, row: int):
+        self.ui.transitionTableTableWidget.removeRow(row)
         self.update_transition_table()
+        self.draw_transition_table()
 
     def current_turmite(self):
         return self.project.model.turmites[self.ui.selectedTurmiteComboBox.currentIndex()]
