@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import math
 import typing
 
 from .infinite_grid import InfiniteGrid, Position
@@ -72,6 +73,15 @@ class TransitionTable:
         return cls({tuple(key): tuple(value) for key, value in data})
 
 
+def direction_to_xy_diff(direction: TurmiteDirection) -> tuple[int, int]:
+    return {
+        0: (0, 1),  # down
+        1: (-1, 0),  # left
+        2: (0, -1),  # up
+        3: (1, 0)  # right
+    }[direction]
+
+
 @dataclasses.dataclass
 class Turmite:
     transition_table: TransitionTable
@@ -94,16 +104,9 @@ class Turmite:
     def _go_forward(self):
         x, y = self.position
 
-        if self.direction == 0:
-            y += 1  # up
-        elif self.direction == 1:
-            x -= 1  # left
-        elif self.direction == 2:
-            y -= 1  # down
-        elif self.direction == 3:
-            x += 1  # right
+        dx, dy = direction_to_xy_diff(self.direction)
 
-        self.position = x, y
+        self.position = x + dx, y + dy
 
     def to_json(self) -> dict:
         return {

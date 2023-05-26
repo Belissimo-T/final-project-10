@@ -2,7 +2,7 @@
 - [X] reorder turmites
 - [X] painting
 - [X] select a turmite
-- [ ] add a rule
+- [X] add a rule
 - [ ] check rules
-- [ ] display blickrichtung
+- [X] display blickrichtung
 - [X] display number

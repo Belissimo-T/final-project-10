@@ -13,7 +13,7 @@ from PyQt5 import QtCore as QtC
 
 from main_window import Ui_MainWindow
 from turmites.infinite_grid import Position
-from turmites.turmite import MultipleTurmiteModel, TurmiteState, CellColor
+from turmites.turmite import MultipleTurmiteModel, TurmiteState, CellColor, direction_to_xy_diff
 
 
 class StateColors:
@@ -200,6 +200,15 @@ class TurmitesGraphicsView:
                     x * self._scale, y * self._scale, self._scale, self._scale,
                     QtG.QPen(QtG.QColor(0, 0, 0), 1),
                     QtG.QBrush(state_colors.get_color(turmite.state))
+                )
+            )
+            dx, dy = direction_to_xy_diff(turmite.direction)
+            self.turmite_graphics_items.append(
+                self.scene.addLine(
+                    (x + 0.5 + dx * 0.35) * self._scale,
+                    (y + 0.5 + dy * 0.35) * self._scale,
+                    (x + 0.5 + dx * 0.65) * self._scale,
+                    (y + 0.5 + dy * 0.65) * self._scale
                 )
             )
             text = QtW.QGraphicsTextItem(
@@ -450,7 +459,6 @@ class ProjectView:
     def add_transition_table_entry(self):
         table = self.ui.transitionTableTableWidget
 
-        turmite = self.current_turmite()
         state_colors = self.current_turmite_colors()
 
         row = table.rowCount() - 1
