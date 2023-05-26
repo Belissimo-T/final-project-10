@@ -514,6 +514,7 @@ class ProjectView:
         for i, turmite in enumerate(self.project.model.turmites):
             self.ui.selectedTurmiteComboBox.addItem(f"#{i + 1}")
 
+        self.ui.selectedTurmiteComboBox.disconnect()
         self.ui.selectedTurmiteComboBox.currentIndexChanged.connect(self.draw_turmite_specific)
 
     def draw_state_table(self, table: QtW.QTableWidget, state_colors: StateColors, msg: str):
@@ -592,6 +593,8 @@ class ProjectView:
         self.draw_turmite_specific()
 
         self.ui.actionSaveProject.triggered.connect(self.save_project)
+        self.ui.actionClearSimulationView.triggered.connect(self.clear_simulation_view)
+        self.ui.removeTurmitePushButton.clicked.connect(self.remove_turmite)
 
         self.turmites_view = TurmitesGraphicsView(
             self.ui.simulationView,
@@ -685,6 +688,22 @@ class ProjectView:
         self.turmites_view.draw_turmites()
         self.draw_turmite_specific()
 
+    def clear_simulation_view(self):
+        self.project.model.grid.clear()
+        self.turmites_view.draw_turmites()
+
+    def remove_turmite(self):
+        if len(self.project.model.turmites) < 2:
+            return
+
+        curr_t_i = self.ui.selectedTurmiteComboBox.currentIndex()
+        self.project.turmite_state_colors.pop(curr_t_i)
+        self.project.model.turmites.pop(curr_t_i)
+
+        self.draw_turmites_combo_box()
+        self.turmites_view.draw_turmites()
+        self.draw_turmite_specific()
+
 
 class MainWindow(QtW.QMainWindow, Ui_MainWindow):
     def __init__(self, project: Project = None):
@@ -694,7 +713,7 @@ class MainWindow(QtW.QMainWindow, Ui_MainWindow):
         project = Project() if project is None else project
         self.set_project(project)
 
-        self.actionOpen.triggered.connect(self.open_project)
+        self.actionOpenProject.triggered.connect(self.open_project)
         self.actionQuit.triggered.connect(self.close)
 
     def open_project(self):

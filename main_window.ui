@@ -325,6 +325,13 @@
                   </widget>
                  </item>
                  <item>
+                  <widget class="QPushButton" name="removeTurmitePushButton">
+                   <property name="text">
+                    <string>remove Turmite</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <spacer name="horizontalSpacer_2">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
@@ -406,7 +413,13 @@
                 </column>
                 <column>
                  <property name="text">
-                  <string>Turn Direction</string>
+                  <string>New Direction</string>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <underline>true</underline>
+                   <kerning>true</kerning>
+                  </font>
                  </property>
                  <property name="textAlignment">
                   <set>AlignLeading|AlignVCenter</set>
@@ -440,7 +453,7 @@
                 </column>
                 <column>
                  <property name="text">
-                  <string>Hint</string>
+                  <string/>
                  </property>
                 </column>
                </widget>
@@ -572,23 +585,15 @@
      <x>0</x>
      <y>0</y>
      <width>1205</width>
-     <height>30</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
-    <widget class="QMenu" name="menuSave">
-     <property name="title">
-      <string>Save or Export</string>
-     </property>
-     <addaction name="actionSaveProject"/>
-     <addaction name="actionSaveSimulationView"/>
-     <addaction name="actionSaveRules"/>
-    </widget>
-    <addaction name="menuSave"/>
-    <addaction name="actionOpen"/>
+    <addaction name="actionSaveProject"/>
+    <addaction name="actionOpenProject"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -597,9 +602,10 @@
      <string>Simulation</string>
     </property>
     <addaction name="actionPlay"/>
-    <addaction name="separator"/>
     <addaction name="actionFullStep"/>
     <addaction name="actionStepOneTurmite"/>
+    <addaction name="separator"/>
+    <addaction name="actionClearSimulationView"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSimulation"/>
@@ -612,17 +618,12 @@
   </action>
   <action name="actionSaveSimulationView">
    <property name="text">
-    <string>Simulation View</string>
+    <string>Simulation view</string>
    </property>
   </action>
   <action name="actionSaveRules">
    <property name="text">
     <string>Rules</string>
-   </property>
-  </action>
-  <action name="actionSaveProject">
-   <property name="text">
-    <string>Project</string>
    </property>
   </action>
   <action name="actionFullStep">
@@ -640,24 +641,34 @@
     <string>Start</string>
    </property>
   </action>
-  <action name="actionOpenProject">
-   <property name="text">
-    <string>Project</string>
-   </property>
-  </action>
-  <action name="actionOpenSimulationView">
-   <property name="text">
-    <string>Simulation View</string>
-   </property>
-  </action>
   <action name="actionOpenRules">
    <property name="text">
     <string>Rules</string>
    </property>
   </action>
-  <action name="actionOpen">
+  <action name="actionClearSimulationView">
    <property name="text">
-    <string>Open</string>
+    <string>Clear simulation view</string>
+   </property>
+  </action>
+  <action name="actionProject">
+   <property name="text">
+    <string>Project</string>
+   </property>
+  </action>
+  <action name="actionRules">
+   <property name="text">
+    <string>Rules</string>
+   </property>
+  </action>
+  <action name="actionSaveProject">
+   <property name="text">
+    <string>Save project</string>
+   </property>
+  </action>
+  <action name="actionOpenProject">
+   <property name="text">
+    <string>Open project</string>
    </property>
   </action>
  </widget>

@@ -41,6 +41,10 @@ class InfiniteGrid(typing.Generic[T]):
             "default": self.default
         }
 
+    def clear(self):
+        for key in list(self._grid.keys()):
+            self[key] = self.default
+
     @classmethod
     def from_json(cls, data: dict) -> "InfiniteGrid":
         # noinspection PyTypeChecker

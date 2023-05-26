@@ -3,6 +3,5 @@
 - [X] painting
 - [X] select a turmite
 - [X] add a rule
-- [ ] check rules
 - [X] display blickrichtung
 - [X] display number
