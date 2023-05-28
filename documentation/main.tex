@@ -12,7 +12,21 @@
 ]{scrartcl}
 
 \usepackage{fontspec}
-% \setmainfont{Arial}
+\setmainfont{Liberation Sans}
+\setsansfont{Liberation Sans}
+\setmonofont{Liberation Mono}
+
+\addtokomafont{disposition}{\rmfamily}
+
+\usepackage{geometry}
+\geometry{
+	left=5cm,
+	right=2cm,
+	top=2cm,
+	bottom=2cm
+	}
+	
+\usepackage[onehalfspacing]{setspace}
 
 % Schriftarten mit Umlauten
 % \usepackage[T1]{fontenc}
@@ -23,7 +37,8 @@
 
 % richtige Silbentrennung
 % passende Darstellung des Datums
-\usepackage{babel}
+\usepackage[ngerman]{babel}
+\addto\captionsngerman{\renewcommand{\refname}{Quellenverzeichnis}}
 
 % \usepackage{mathtools}
 
@@ -40,24 +55,50 @@
 % \usepackage{microtype}
 
 \begin{document}
+
 \title{
-	Dokumentation
+	Turmites-Simulation
 }
 \subtitle{
-	des Abschlussprojektes Informatik der Klasse 10
+	Dokumentation des Informatik-Abschlussprojektes der Klasse 10
 }
 \author{
 	Bela Tollkien
 }
-\date{31.05.2023}
+\date{März bis Mai 2023}
 
 \maketitle
 
-\section{Kurzreferat}
-% \input{abstract.tex}
-% Font: \font
-\section{Inhalt}
 \tableofcontents
-\section{Quellenverzeichnis}
-\section{Selbstständigkeitserklärung}
+
+\section*{Kurzreferat}
+\addcontentsline{toc}{section}{\protect\numberline{}Kurzreferat}
+\input{abstract.tex}
+
+\input{body.tex}
+
+\LaTeX{} \cite{latex2e} is a set of macros built atop \TeX{} \cite{texbook}.
+
+% \addcontentsline{toc}{section}{\protect\numberline{}Quellenverzeichnis}
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\section*{Selbstständigkeitserklärung}
+\addcontentsline{toc}{section}{\protect\numberline{}Selbstständigkeitserklärung}
+Ich, Bela Tollkien, erkläre hiermit, dass die vorliegende Dokumentation eigenständig und ohne fremde, nicht angegebene Hilfe verfasst wurde. Alle verwendeten Quellen wurden korrekt zitiert und ordnungsgemäß angegeben.
+
+\vspace{2cm}
+
+\noindent
+
+\begin{tabular}{p{5cm}p{.5cm}l}
+	\dotfill \\ 
+	Ort, Datum
+\end{tabular}
+\hfill
+\begin{tabular}{p{5cm}p{.5cm}l}
+	\dotfill \\ 
+	Unterschrift
+\end{tabular}
+
 \end{document} 
