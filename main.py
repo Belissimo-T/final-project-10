@@ -14,6 +14,7 @@ from PyQt5 import QtCore as QtC
 from main_window import Ui_MainWindow
 from turmites.infinite_grid import Position
 from turmites.turmite import MultipleTurmiteModel, TurmiteState, CellColor, direction_to_xy_diff
+import turmites.turmite
 
 
 class StateColors:
@@ -606,6 +607,7 @@ class ProjectView:
 
         self.ui.actionSaveProject.triggered.connect(self.save_project)
         self.ui.actionClearSimulationView.triggered.connect(self.clear_simulation_view)
+        self.ui.removeTurmitePushButton.disconnect()
         self.ui.removeTurmitePushButton.clicked.connect(self.remove_turmite)
 
         self.turmites_view = TurmitesGraphicsView(
@@ -660,7 +662,20 @@ class ProjectView:
 
     def tick(self):
         for _ in range(self.ui.speedSpinBox.value()):
-            self.project.model.step()
+            try:
+                self.project.model.step()
+            except turmites.turmite.UnknownStateError:
+                self.stop_simulation()
+                current_turmite = self.project.model.small_step
+                QtW.QMessageBox.critical(
+                    self.ui.centralwidget,
+                    f"Unknown state encountered in Turmite #{current_turmite + 1}",
+                    "The simulation was paused. There exists no entry in the transition table for the following:\n"
+                    f"Cell state: {self.project.model.grid[self.project.model.turmites[current_turmite].position]}\n"
+                    f"Turmite state: {self.project.model.turmites[current_turmite].state}\n"
+                    f"Add an appropriate entry to the transition table and resume the simulation."
+                )
+                return
 
         self.turmites_view.draw_turmites()
 
