@@ -1,0 +1,63 @@
+\documentclass[
+	fontsize=12pt,
+	paper=a4,
+	pagesize=auto,
+	% Normalerweise wird die erste Zeile eines Absatzes eingerückt, um diesen hervorzuheben.
+	% Als Alternative kann man parskip aktivieren, womit statt dem Einrücken ein vertikaler Abstand verwendet wird.
+	% Typische Werte sind false, half und full.
+	parskip=half,
+    titlepage=true,
+	% Sprache des Dokuments
+	ngerman
+]{scrartcl}
+
+\usepackage{fontspec}
+% \setmainfont{Arial}
+
+% Schriftarten mit Umlauten
+% \usepackage[T1]{fontenc}
+
+% \usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+
+% richtige Silbentrennung
+% passende Darstellung des Datums
+\usepackage{babel}
+
+% \usepackage{mathtools}
+
+\usepackage{siunitx}
+% Komma statt Punkt als Dezimaltrennzeichen
+\sisetup{locale=DE}
+
+% \usepackage{lmodern}
+
+\usepackage{url}
+
+\usepackage[table]{xcolor}
+
+% \usepackage{microtype}
+
+\begin{document}
+\title{
+	Dokumentation
+}
+\subtitle{
+	des Abschlussprojektes Informatik der Klasse 10
+}
+\author{
+	Bela Tollkien
+}
+\date{31.05.2023}
+
+\maketitle
+
+\section{Kurzreferat}
+% \input{abstract.tex}
+% Font: \font
+\section{Inhalt}
+\tableofcontents
+\section{Quellenverzeichnis}
+\section{Selbstständigkeitserklärung}
+\end{document} 
