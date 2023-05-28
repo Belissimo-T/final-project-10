@@ -90,9 +90,9 @@ class StateComboBox(QtW.QWidget):
 class TurnDirectionComboBox(QtW.QWidget):
     TURN_DIRECTIONS = {
         0: "Don't turn",
-        1: "Turn left",
+        1: "Turn anticlockwise",
         2: "Turn around",
-        3: "Turn right",
+        3: "Turn clockwise",
     }
 
     def __init__(self, turn_direction: int | None, update_callback):
@@ -327,7 +327,7 @@ class AddListEntryButton(QtW.QWidget):
         super().__init__(parent)
 
         self.main_layout = QtW.QVBoxLayout()
-        self.button = QtW.QPushButton("Add Transition Table Entry")
+        self.button = QtW.QPushButton("Add transition table entry")
         self.main_layout.addWidget(self.button)
         self.setLayout(self.main_layout)
 
@@ -441,8 +441,8 @@ class ProjectView:
             table.setCellWidget(row, 2, TurnDirectionComboBox(turn_direction, update_callback))
             table.setCellWidget(row, 3, StateComboBox(new_cell_color, self.project.cell_state_colors, update_callback))
             table.setCellWidget(row, 4, StateComboBox(new_turmite_state, state_colors, update_callback))
-            table.setCellWidget(row, 5,
-                                RemoveListEntryButton(table, lambda _row=row: self.remove_transition_table_entry(_row)))
+            remove_callback = lambda *_, __row=row: self.remove_transition_table_entry(__row)
+            table.setCellWidget(row, 5, RemoveListEntryButton(table, remove_callback))
 
         self.draw_add_transition_table_entry()
 
@@ -469,11 +469,14 @@ class ProjectView:
         table.setCellWidget(row, 2, TurnDirectionComboBox(None, update_callback))
         table.setCellWidget(row, 3, StateComboBox(None, self.project.cell_state_colors, update_callback))
         table.setCellWidget(row, 4, StateComboBox(None, state_colors, update_callback))
-        table.setCellWidget(row, 5, RemoveListEntryButton(table, lambda _row=row: self.remove_transition_table_entry(_row)))
+        remove_callback = lambda *_, __row=row: self.remove_transition_table_entry(__row)
+        table.setCellWidget(row, 5, RemoveListEntryButton(table, remove_callback))
 
         self.draw_add_transition_table_entry()
 
         table.resizeRowsToContents()
+
+        self.update_transition_table()
 
     def remove_transition_table_entry(self, row: int):
         self.ui.transitionTableTableWidget.removeRow(row)
@@ -494,7 +497,7 @@ class ProjectView:
         table = self.ui.transitionTableTableWidget
 
         self.current_turmite().transition_table.clear()
-        for row in range(self.ui.transitionTableTableWidget.rowCount()):
+        for row in reversed(range(self.ui.transitionTableTableWidget.rowCount())):
             if table.cellWidget(row, 4) is None:
                 continue
             cell_color = table.cellWidget(row, 0).get_current_state()
@@ -502,6 +505,15 @@ class ProjectView:
             turn_direction = table.cellWidget(row, 2).get_current_turn_direction()
             new_cell_color = table.cellWidget(row, 3).get_current_state()
             new_turmite_state = table.cellWidget(row, 4).get_current_state()
+
+            if (cell_color, turmite_state) in self.current_turmite().transition_table:
+                # disable row
+                for col in range(table.columnCount()):
+                    table.cellWidget(row, col).setEnabled(False)
+            else:
+                # enable row
+                for col in range(table.columnCount()):
+                    table.cellWidget(row, col).setEnabled(True)
 
             self.current_turmite().transition_table.set_entry(
                 cell_color, turmite_state,
@@ -587,7 +599,7 @@ class ProjectView:
             QtW.QHeaderView.ResizeMode.Interactive
         )
 
-        self.draw_state_table(self.ui.cellStatesTableWidget, self.project.cell_state_colors, "Add Cell State")
+        self.draw_state_table(self.ui.cellStatesTableWidget, self.project.cell_state_colors, "Add cell state")
         self.draw_turmites_combo_box()
 
         self.draw_turmite_specific()
@@ -626,7 +638,7 @@ class ProjectView:
 
     def draw_turmite_specific(self):
         self.draw_transition_table()
-        self.draw_state_table(self.ui.turmiteStatesTableWidget, self.current_turmite_colors(), "Add Turmite State")
+        self.draw_state_table(self.ui.turmiteStatesTableWidget, self.current_turmite_colors(), "Add Turmite state")
 
     def start_simulation(self):
         self.ui.playToolButton.clicked.connect(self.stop_simulation)

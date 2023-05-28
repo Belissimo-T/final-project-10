@@ -40,7 +40,7 @@ def langtons_ant_project():
     p = Project(
         model,
         StateColors({1: QtG.QColor(0xFF_000000), 0: QtG.QColor(0xFF_FFFFFF)}),
-        [StateColors({0: QtG.QColor(0xFF_00FF00)})] * 2
+        [StateColors({0: QtG.QColor(0xFF_00FF00)})]
     )
     data = p.to_json()
 

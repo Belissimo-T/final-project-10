@@ -56,6 +56,9 @@
          <property name="text">
           <string>Start</string>
          </property>
+         <property name="shortcut">
+          <string>Space</string>
+         </property>
          <property name="checkable">
           <bool>false</bool>
          </property>
@@ -97,6 +100,9 @@
           </item>
           <item>
            <widget class="QSpinBox" name="speedSpinBox">
+            <property name="buttonSymbols">
+             <enum>QAbstractSpinBox::UpDownArrows</enum>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -111,14 +117,14 @@
        <item>
         <widget class="QToolButton" name="fullStepToolButton">
          <property name="text">
-          <string>Full Step</string>
+          <string>Step all Turmites</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QToolButton" name="stepOneTurmiteToolButton">
          <property name="text">
-          <string>Step one turmite</string>
+          <string>Step single Turmite</string>
          </property>
         </widget>
        </item>
@@ -229,13 +235,6 @@
         <item row="0" column="0">
          <widget class="QGraphicsView" name="simulationView"/>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="graphicsStatusLabel">
-          <property name="text">
-           <string>Status</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </widget>
       <widget class="QGroupBox" name="rulesGroupBox">
@@ -270,7 +269,7 @@
               </sizepolicy>
              </property>
              <property name="title">
-              <string>Transition Table</string>
+              <string>Transition table</string>
              </property>
              <property name="flat">
               <bool>false</bool>
@@ -302,12 +301,16 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QComboBox" name="selectedTurmiteComboBox"/>
+                  <widget class="QComboBox" name="selectedTurmiteComboBox">
+                   <property name="sizeAdjustPolicy">
+                    <enum>QComboBox::AdjustToContents</enum>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QToolButton" name="reorderUpToolButton">
                    <property name="toolTip">
-                    <string>Reorder Turmite: execute this turmite earlier</string>
+                    <string>Reorder Turmite: Execute this turmite earlier</string>
                    </property>
                    <property name="text">
                     <string>⌃</string>
@@ -317,7 +320,7 @@
                  <item>
                   <widget class="QToolButton" name="reorderDownToolButton">
                    <property name="toolTip">
-                    <string>Reorder Turmite: execute this turmite later</string>
+                    <string>Reorder Turmite: Execute this turmite later</string>
                    </property>
                    <property name="text">
                     <string>⌄</string>
@@ -327,7 +330,7 @@
                  <item>
                   <widget class="QPushButton" name="removeTurmitePushButton">
                    <property name="text">
-                    <string>remove Turmite</string>
+                    <string>Remove Turmite</string>
                    </property>
                   </widget>
                  </item>
@@ -467,7 +470,7 @@
                  </sizepolicy>
                 </property>
                 <property name="title">
-                 <string>Turmite States</string>
+                 <string>Turmite states</string>
                 </property>
                 <property name="flat">
                  <bool>true</bool>
@@ -628,12 +631,12 @@
   </action>
   <action name="actionFullStep">
    <property name="text">
-    <string>Full step</string>
+    <string>Step all Turmite</string>
    </property>
   </action>
   <action name="actionStepOneTurmite">
    <property name="text">
-    <string>Step one turmite</string>
+    <string>Step single Turmite</string>
    </property>
   </action>
   <action name="actionPlay">

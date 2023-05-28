@@ -5,3 +5,4 @@
 - [X] add a rule
 - [X] display blickrichtung
 - [X] display number
+- [X] swap left/right

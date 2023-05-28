@@ -51,7 +51,7 @@ class InfiniteGrid(typing.Generic[T]):
         return cls(
             data["default"],
             dict(
-                (tuple(map(int, key.split(";"))), value)
+                (tuple(map(lambda x: int(float(x)), key.split(";"))), value)
                 for key, value in data["grid"]
             )
         )
