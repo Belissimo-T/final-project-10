@@ -351,7 +351,10 @@ class RemoveListEntryButton(QtW.QWidget):
 
         self.set_callback(callback)
     def set_callback(self, callback):
-        self.button.disconnect()
+        try:
+            self.button.disconnect()
+        except TypeError:
+            pass
         self.button.clicked.connect(callback)
 
 
