@@ -186,10 +186,15 @@ class TurmitesGraphicsView:
         if cell_state == self.turmite_model.grid.default:
             return
 
+        try:
+            cell_color = self.cell_state_colors.get_color(cell_state)
+        except KeyError:
+            cell_color = QtG.QColor(128, 128, 128)
+
         self.cell_graphics_items[position] = self.scene.addRect(
             QtC.QRectF(x * self._scale, y * self._scale, self._scale, self._scale),
             QtG.QPen(QtG.QColor(0, 0, 0)),
-            QtG.QBrush(self.cell_state_colors.get_color(cell_state))
+            QtG.QBrush(cell_color)
         )
 
     def draw_turmites(self):
@@ -200,11 +205,16 @@ class TurmitesGraphicsView:
 
         for i, (turmite, state_colors) in enumerate(zip(self.turmite_model.turmites, self.turmite_state_colors)):
             x, y = turmite.position
+            try:
+                turmite_color = state_colors.get_color(turmite.state)
+            except KeyError:
+                turmite_color = QtG.QColor(128, 128, 128)
+
             self.turmite_graphics_items.append(
                 self.scene.addEllipse(
                     x * self._scale, y * self._scale, self._scale, self._scale,
                     QtG.QPen(QtG.QColor(0, 0, 0), 1),
-                    QtG.QBrush(state_colors.get_color(turmite.state))
+                    QtG.QBrush(turmite_color)
                 )
             )
             dx, dy = direction_to_xy_diff(turmite.direction)
@@ -277,54 +287,6 @@ class TurmitesGraphicsView:
 
             self.draw_turmites()
 
-    # """
-    #
-    # bool MyGraphicsView::eventFilter(QObject *object, QEvent *event) {
-    #
-    #   if (event->type() == QEvent::MouseButtonPress)
-    #   {
-    #       QMouseEvent* mouse_event = static_cast<QMouseEvent*>(event);
-    #       // Enter here any button you like
-    #       if (mouse_event->button() == Qt::MiddleButton)
-    #       {
-    #           // temporarly enable dragging mode
-    #           this->setDragMode(QGraphicsView::DragMode::ScrollHandDrag);
-    #           // emit a left mouse click (the default button for the drag mode)
-    #           QMouseEvent* pressEvent = new QMouseEvent(QEvent::GraphicsSceneMousePress,
-    #                                     mouse_event->pos(), Qt::MouseButton::LeftButton,
-    #                                     Qt::MouseButton::LeftButton, Qt::KeyboardModifier::NoModifier);
-    #
-    #           this->mousePressEvent(pressEvent);
-    #       }
-    #       else if (event->type() == QEvent::MouseButtonRelease)
-    #       {
-    #           // disable drag mode if dragging is finished
-    #           this->setDragMode(QGraphicsView::DragMode::NoDrag);
-    #       }
-    #
-    #       Q_UNUSED(object)
-    #       return false;
-    # }"""
-    #
-    # @staticmethod
-    # def graphics_view_event_filter(self: QtW.QGraphicsView, obj, event: QtC.QEvent):
-    #     if event.type() == QtC.QEvent.MouseButtonPress:
-    #         event: QtG.QMouseEvent
-    #
-    #         if event.button() == QtC.Qt.MouseButton.RightButton:
-    #             self.setDragMode(QtW.QGraphicsView.DragMode.ScrollHandDrag)
-    #
-    #             press_event = QtG.QMouseEvent(
-    #                 QtC.QEvent.GraphicsSceneMousePress,
-    #                 event.pos(),
-    #                 QtC.Qt.MouseButton.LeftButton,
-    #                 QtC.Qt.KeyboardModifier.NoModifier
-    #             )
-    #             self.mousePressEvent(press_event)
-    #
-    #     elif event.type() == QtC.QEvent.MouseButtonRelease:
-    #         ...
-    #
 
 
 class AddListEntryButton(QtW.QWidget):
@@ -602,11 +564,6 @@ class ProjectView:
     def remove_state_color(self, table: QtW.QTableWidget, state_colors: StateColors, index: int, msg: str) -> None:
         key = list(state_colors.states.keys())[index]
 
-        if key == self.current_turmite().state:
-            # show message box
-            QtW.QMessageBox.critical(None, "Error", "Cannot remove state that is currently used by turmite.")
-            return
-
         del state_colors.states[key]
         self.draw_state_table(table, state_colors, msg)
         self.draw_transition_table()
@@ -848,6 +805,7 @@ class MainWindow(QtW.QMainWindow, Ui_MainWindow):
     def set_project(self, project: Project):
         if self.project_view is not None:
             self.project_view.stop_simulation()
+            self.project_view.tick_timer.timeout.disconnect(self.project_view.tick)
         self.project_view = ProjectView(project, self)
         self.project_view.init()
 

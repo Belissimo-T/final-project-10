@@ -402,7 +402,7 @@
                 </attribute>
                 <column>
                  <property name="text">
-                  <string>Current Cell Color</string>
+                  <string>Current Cell State</string>
                  </property>
                  <property name="font">
                   <font>
@@ -444,7 +444,7 @@
                 </column>
                 <column>
                  <property name="text">
-                  <string>New Cell Color</string>
+                  <string>New Cell State</string>
                  </property>
                  <property name="font">
                   <font>

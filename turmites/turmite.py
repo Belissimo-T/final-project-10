@@ -47,6 +47,12 @@ class TransitionTable:
             turn_direction, new_cell_color, new_turmite_state
         )
 
+    def contains_cell_color(self, cell_color: CellColor) -> bool:
+        return any(key[0] == cell_color for key in self._transition_dict.keys())
+
+    def contains_turmite_state(self, turmite_state: TurmiteState) -> bool:
+        return any(key[1] == turmite_state for key in self._transition_dict.keys())
+
     def clear(self):
         self._transition_dict.clear()
 
