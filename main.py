@@ -654,21 +654,24 @@ class ProjectView:
             self
         )
 
-        self.ui.placeToolButton.disconnect()
-        self.ui.playToolButton.clicked.connect(self.start_simulation)
-        self.ui.actionPlay.disconnect()
+        try:
+            self.ui.placeToolButton.disconnect()
+            self.ui.actionPlay.disconnect()
+            self.ui.fullStepToolButton.disconnect()
+            self.ui.actionFullStep.disconnect()
+            self.ui.stepOneTurmiteToolButton.disconnect()
+            self.ui.actionStepOneTurmite.disconnect()
+            self.ui.reorderDownToolButton.disconnect()
+            self.ui.reorderUpToolButton.disconnect()
+        except TypeError:
+            pass
         self.ui.actionPlay.triggered.connect(self.start_simulation)
-        self.ui.fullStepToolButton.disconnect()
+        self.ui.playToolButton.clicked.connect(self.start_simulation)
         self.ui.fullStepToolButton.clicked.connect(self.full_step)
-        self.ui.actionFullStep.disconnect()
         self.ui.actionFullStep.triggered.connect(self.full_step)
-        self.ui.stepOneTurmiteToolButton.disconnect()
         self.ui.stepOneTurmiteToolButton.clicked.connect(self.step_one_turmite)
-        self.ui.actionStepOneTurmite.disconnect()
         self.ui.actionStepOneTurmite.triggered.connect(self.step_one_turmite)
-        self.ui.reorderUpToolButton.disconnect()
         self.ui.reorderUpToolButton.clicked.connect(self.reorder_up)
-        self.ui.reorderDownToolButton.disconnect()
         self.ui.reorderDownToolButton.clicked.connect(self.reorder_down)
 
         self.update_iteration_nr()
