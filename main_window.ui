@@ -623,6 +623,7 @@
     <addaction name="actionStepOneTurmite"/>
     <addaction name="separator"/>
     <addaction name="actionClearSimulationView"/>
+    <addaction name="actionResetSimulationViewZoom"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSimulation"/>
@@ -686,6 +687,11 @@
   <action name="actionOpenProject">
    <property name="text">
     <string>Open project</string>
+   </property>
+  </action>
+  <action name="actionResetSimulationViewZoom">
+   <property name="text">
+    <string>Reset simulation view zoom</string>
    </property>
   </action>
  </widget>

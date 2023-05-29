@@ -326,6 +326,8 @@ class Ui_MainWindow(object):
         self.actionSaveProject.setObjectName("actionSaveProject")
         self.actionOpenProject = QtWidgets.QAction(MainWindow)
         self.actionOpenProject.setObjectName("actionOpenProject")
+        self.actionResetSimulationViewZoom = QtWidgets.QAction(MainWindow)
+        self.actionResetSimulationViewZoom.setObjectName("actionResetSimulationViewZoom")
         self.menuFile.addAction(self.actionSaveProject)
         self.menuFile.addAction(self.actionOpenProject)
         self.menuFile.addSeparator()
@@ -335,6 +337,7 @@ class Ui_MainWindow(object):
         self.menuSimulation.addAction(self.actionStepOneTurmite)
         self.menuSimulation.addSeparator()
         self.menuSimulation.addAction(self.actionClearSimulationView)
+        self.menuSimulation.addAction(self.actionResetSimulationViewZoom)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuSimulation.menuAction())
 
@@ -391,3 +394,4 @@ class Ui_MainWindow(object):
         self.actionRules.setText(_translate("MainWindow", "Rules"))
         self.actionSaveProject.setText(_translate("MainWindow", "Save project"))
         self.actionOpenProject.setText(_translate("MainWindow", "Open project"))
+        self.actionResetSimulationViewZoom.setText(_translate("MainWindow", "Reset simulation view zoom"))

@@ -170,6 +170,10 @@ class TurmitesGraphicsView:
 
         self.scene.mousePressEvent = self.scene_mouse_press_event
 
+        self.project_view.ui.actionResetSimulationViewZoom.disconnect()
+        self.project_view.ui.actionResetSimulationViewZoom.triggered.connect(lambda *_: self.view.resetTransform())
+
+
         # self.view.eventFilter = self.graphics_view_event_filter
 
     def update_cell(self, position: Position, cell_state: int):
