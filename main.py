@@ -91,9 +91,9 @@ class StateComboBox(QtW.QWidget):
 class TurnDirectionComboBox(QtW.QWidget):
     TURN_DIRECTIONS = {
         0: "Don't turn",
-        1: "Turn anticlockwise",
+        1: "Turn clockwise",
         2: "Turn around",
-        3: "Turn clockwise",
+        3: "Turn anticlockwise",
     }
 
     def __init__(self, turn_direction: int | None, update_callback):
@@ -345,7 +345,9 @@ class RemoveListEntryButton(QtW.QWidget):
         self.main_layout.addWidget(self.button)
         self.setLayout(self.main_layout)
 
-        self.callback = callback
+        self.set_callback(callback)
+    def set_callback(self, callback):
+        self.button.disconnect()
         self.button.clicked.connect(callback)
 
 
@@ -482,7 +484,14 @@ class ProjectView:
     def remove_transition_table_entry(self, row: int):
         self.ui.transitionTableTableWidget.removeRow(row)
         self.update_transition_table()
-        self.draw_transition_table()
+
+        table = self.ui.transitionTableTableWidget
+
+        for row in range(self.ui.transitionTableTableWidget.rowCount() - 1):
+            remove_callback = lambda *_, __row=row: self.remove_transition_table_entry(__row)
+            table.cellWidget(row, 5).set_callback(remove_callback)
+
+        # self.draw_transition_table()
 
     def current_turmite(self):
         return self.project.model.turmites[self.ui.selectedTurmiteComboBox.currentIndex()]
@@ -509,12 +518,27 @@ class ProjectView:
 
             if (cell_color, turmite_state) in self.current_turmite().transition_table:
                 # disable row
-                for col in range(table.columnCount()):
+                for col in range(table.columnCount() - 1):
                     table.cellWidget(row, col).setEnabled(False)
             else:
                 # enable row
-                for col in range(table.columnCount()):
+                for col in range(table.columnCount() - 1):
                     table.cellWidget(row, col).setEnabled(True)
+
+            self.current_turmite().transition_table.set_entry(
+                cell_color, turmite_state,
+                turn_direction, new_cell_color, new_turmite_state
+            )
+
+        self.current_turmite().transition_table.clear()
+        for row in range(self.ui.transitionTableTableWidget.rowCount()):
+            if table.cellWidget(row, 4) is None:
+                continue
+            cell_color = table.cellWidget(row, 0).get_current_state()
+            turmite_state = table.cellWidget(row, 1).get_current_state()
+            turn_direction = table.cellWidget(row, 2).get_current_turn_direction()
+            new_cell_color = table.cellWidget(row, 3).get_current_state()
+            new_turmite_state = table.cellWidget(row, 4).get_current_state()
 
             self.current_turmite().transition_table.set_entry(
                 cell_color, turmite_state,

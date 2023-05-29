@@ -6,3 +6,6 @@
 - [X] display blickrichtung
 - [X] display number
 - [X] swap left/right
+- [ ] zoom reset
+- [ ] iterationsschritte
+- [ ] Position Turmites
