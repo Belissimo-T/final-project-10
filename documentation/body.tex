@@ -1,1 +1,94 @@
 \section{Motivation}
+
+\section{Turmites}
+Turmites sind ein Konzept aus der Mathematik bzw. Informatik. Dabei handelt es sich um "Maschinen", die, einer Übergangstabelle folgend, sich auf einem unendlichen Quadratgitter bewegen. Sie besitzen jeweils eine Position, Blickrichtung sowie einen Zustand. Für die Simulation ist eine fortlaufende Iteration notwendig. Dabei wird wie folgt vorgegangen:
+\begin{enumerate}
+    \item Die Turmite liest die Farbe des Feldes, auf dem sie sich befindet.
+    \item Anhand der Übergangstabelle entscheidet sie eine neue Zellfarbe und Drehrichtung
+    \item Die Turmite ändert die Farbe des Feldes, auf dem sie sich befindet.
+    \item Die Turmite dreht sich anhand der Drehrichtung.
+    \item Die Turmite bewegt sich ein Feld in Blickrichtung.
+\end{enumerate}
+
+\subsection{Übergangstabelle}
+Eine Übergangstabelle legt fest, wie sich die Turmite in Abhängigkeit von der Zellfarbe und dem Zustand verhält. Sie besteht aus fünf Spalten:
+\begin{enumerate}
+    \item Zellfarbe (gegeben)
+    \item Zustand (gegeben)
+    \item Drehrichtung
+    \item neue Zellfarbe
+    \item neuer Zustand
+\end{enumerate}
+
+Die Drehrichtung ist dabei nicht absolut, sprich "nach Norden/Osten/...", sondern relativ, zum Beispiel "90° im Uhrzeigersinn" oder "umkehren".
+
+Ein Spezialfall einer Turmite ist die "Langton's Ant". Jeden Iterationsschritt wechselt sie die Farbe, die sich unter ihr befindet, und dreht sich je nach Farbe nach recht oder links. Dabei nutzt sie zwei Zellfarben und keinen Zustand. Die Übergangstabelle sieht wie folgt aus:
+
+\subsection{Mehrere Turmites auf einem Quadratgitter}
+Zur Erfüllung des Kannkriteriums 2 \cite{pflichtenheft} wurde die Software so erweitert, dass mehrere Turmites gleichzeitig auf einem Quadratgitter simuliert werden können. Dabei müssen mehrere Dinge beachtet werden:
+
+\begin{itemize}
+    \item Die Reihenfolge der Turmites ist nicht beliebig und muss vor der Simulation klar definiert sein, da die Turmites in jedem Iterationsschritt nacheinander agieren.
+    \item Die Zellfarben müssen für alle Turmites gemeinsam festgelegt werden, währen die Zustände sowie der Rest der Übergangstabelle für jede Turmite individuell anpassbar ist.
+\end{itemize}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l||l|l|l|}
+        \textbf{Zellfarbe} & \textbf{Zustand} & \textbf{Drehricht.} & \textbf{neue Zellfarbe} & \textbf{neuer Zustand} \\
+        \hline
+        0 (schwarz) & 0 & \textit{nach links} & 1 (weiß) & 0 \\
+        1 (weiß) & 0 & \textit{nach rechts} & 0 (schwarz) & 0 \\
+    \end{tabular}
+    \caption{Übergangstabelle der Langton's Ant}
+    % \label{tab:langton}
+\end{table}
+
+\section{Ergebnisse}
+Ergebnis des Projektes ist sowohl das \texttt{turmites}-Python-Modul als auch die grafische Benutzeroberfläche \texttt{main.py} und \texttt{main\_window.*}.
+
+\subsection{Benutzeroberfläche}
+Zur besseren Verständlichkeit werden alle Zustände (Zellzustand/Turmite-Zustand) zusätzlich mit einer Farbe repräsentiert. 
+
+Als Sprache des Interfaces und aller Bezeichner wurde Englisch gewählt, da das Programm so universeller und für mehr Personen zugänglich ist. Auf Einstellbarkeit der Sprache wurde verzichtet, da dies aus Zeitgründen nicht umsetzbar war sowie nicht im Pflichtenheft \cite{pflichtenheft} gefordert wurde.
+
+\subsubsection{Hauptfenster}
+In der Werkzeugleiste des Hauptfensters lässt sich die Simulation mit dem "Start"-Knopf starten sowie stoppen. Dieser ändert seine Aufschrift entsprechend. Daneben lässt sich die Simulationsgeschwindigkeit einstellen. Um nur einen Simulationsschritt durchzuführen, kann man entweder den "Step all Turmites"-Knopf betätigen, der eine volle Iteration durchführt, oder den "Step single Turmite"-Knopf betätigen, der nur den Simulationsschritt einer Turmite durchführt. Bei mehreren Turmites erfordert es somit mehrere Klicks letzteren Knopfes, um eine volle Iteration durchzuführen. 
+
+Der untere Teil des Hauptfensters ist aufgeteilt in Simulationsfläche (Quadratgitter) und Regeleingabe. In der Statusleiste der Simulationsfläche wird die Turmite, die als nächstes agieren wird, zusammen mit der aktuellen Iteration angezeigt. In der Simulationsfläche lässt sich mit Linksklick bewegen und unter Zuhilfenahme des Mausrades zoomen. Per Rechtsklick wird die rechtsseitig in der Werkzeugleiste ausgewählte Aktion durchgeführt ("Place" oder "Paint"). Für die Aktion "Paint" muss zusätzlich eine Zellfarbe in der zugehörigen unten befindlichen Tabelle "Cell states" ausgewählt werden. Die Turmites werden jeweils als ein mit ihrer Nummer beschrifteter Kreis dargestellt, der mit der Farbe des aktuellen Zustandes ausgefüllt ist. Die Blickrichtung gibt ein kleiner Strich an.
+
+Die Regeleingabe ist aufgeteilt in die global, für alle Turmites geltenden Zellfarben und die individuellen Regeln der aktuell ausgewählten Turmite. Diese umfassen Übergangstabelle sowie eine Liste der möglichen Zustände der Turmite. Durch die Knöpfe neben der Turmite-Auswahl lässt sich die aktuell ausgewählte Turmite löschen, soweit sie nicht die einzige ist, sowie die Reihenfolge anpassen. 
+
+\subsubsection{Übergangstabelle}
+In der Übergangstabelle lassen sich die einzelnen Anweisungen mittels der Drop-Down-Menüs bearbeiten.
+
+\subsubsection{Zell- und Turmite-Zustände}
+Per Rechtsklick lässt sich die Farbe von Zuständen nachträglich ändern sowie ein Zustand löschen. Per Knopfdruck lässt sich ein neuer Zustand hinzufügen. Die Nummer des neuen Zustandes wird dabei automatisch ergänzt.
+
+\section{Entwicklung}
+\subsection{Hilfsmittel}
+Zur Entwicklung wurde das Internet intensiv genutzt. Dabei wurden unter Nutzung der Google-Suchmaschine \cite{google} diverse Dokumentationen, zum Beispiel die Qt5-Dokumentation \cite{qt5}, und andere Websites, wie beispielsweise StackOverflow \cite{stackoverflow} zur Hilfe genommen. Außerdem wurde die Software Git \cite{git} sowie die Website GitHub \cite{github} zur Versionsverwaltung genutzt. 
+
+\subsection{Architektur}
+Bei der Konzipierung der Software wurde auf eine strikte Trennung von Darstellung und Logik geachtet. Die gesamte Kernfunktion der Software befindet sich in einem separaten Python-Modul \texttt{turmites}.
+
+Das Konzept des unendlichen Quadratgitters wurde ebenfalls in einer unabhängigen generischen Klasse \texttt{InfiniteGrid} abstrahiert. Dadurch ist eine Wiederverwendbarkeit und Erweiterbarkeit der Software gewährleistet, zum Beispiel in der Form einer Neuimplementierung einer grafischen Benutzeroberfläche. Auch die Verknüpfung von mehreren Turmites in einem Quadratgitter ist dort implementiert. 
+
+Das einfärben der verschiedenen Zustände ist jedoch in der Darstellung implementiert (\texttt{main.py}), da es sich um eine rein visuelle Eigenschaft handelt. Auch das Konzept eines Projektes (\texttt{Project}) wird dort erst eingeführt.
+
+Generell wurde bei der Entwicklung auf eine möglichst objektorientierte Programmierung geachtet. Diese wurde 
+
+Um das Speichern und Öffnen (Serialisierung und Deserialisierung) zu ermöglichen, sind alle relevanten Klassen mit \texttt{to\_json()}- und \texttt{from\_json()}-Methoden ausgestattet. JSON wurde gewählt, da es ein einfaches und menschenlesbares Format ist, was die Implementierung erleichtert. Außerdem ist es in Python bereits integriert.
+
+\section{Diskussion}
+- code nicht schön
+- Add transtition table entry button unten
+- nicht mögliche Dinge abfangen7
+- generell Tabelle in Textform eingeben statt so sehr komplex
+- nicht erlauben Änderungen während der Simulation
+- alle turmites / Gruppen gelichzeitig konfigurieren
+- removing states when in use
+- iteration number not in project
+- Simulationsfläche ineffizient gespeichert
+- Simulationsfläche gesondert speichern
+- nicht jede exception abgefangen

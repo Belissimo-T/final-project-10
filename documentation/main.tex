@@ -24,9 +24,10 @@
 	right=2cm,
 	top=2cm,
 	bottom=2cm
-	}
+}
 	
-\usepackage[onehalfspacing]{setspace}
+% \usepackage{setspace}
+\linespread{1.5}
 
 % Schriftarten mit Umlauten
 % \usepackage[T1]{fontenc}
@@ -47,6 +48,7 @@
 \sisetup{locale=DE}
 
 % \usepackage{lmodern}
+\usepackage[de]{luaquotes}
 
 \usepackage{url}
 
@@ -75,9 +77,11 @@
 \addcontentsline{toc}{section}{\protect\numberline{}Kurzreferat}
 \input{abstract.tex}
 
+\pagebreak
+
 \input{body.tex}
 
-\LaTeX{} \cite{latex2e} is a set of macros built atop \TeX{} \cite{texbook}.
+\pagebreak
 
 % \addcontentsline{toc}{section}{\protect\numberline{}Quellenverzeichnis}
 \bibliographystyle{plain}
