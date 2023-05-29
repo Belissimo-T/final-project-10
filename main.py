@@ -595,6 +595,11 @@ class ProjectView:
     def remove_state_color(self, table: QtW.QTableWidget, state_colors: StateColors, index: int, msg: str) -> None:
         key = list(state_colors.states.keys())[index]
 
+        if key == self.current_turmite().state:
+            # show message box
+            QtW.QMessageBox.critical(None, "Error", "Cannot remove state that is currently used by turmite.")
+            return
+
         del state_colors.states[key]
         self.draw_state_table(table, state_colors, msg)
         self.draw_transition_table()
@@ -651,6 +656,8 @@ class ProjectView:
         self.ui.reorderUpToolButton.clicked.connect(self.reorder_up)
         self.ui.reorderDownToolButton.clicked.connect(self.reorder_down)
 
+        self.update_iteration_nr()
+
     def save_project(self):
         file_path, *_ = QtW.QFileDialog.getSaveFileName(self.ui.centralwidget, "Save Project", "", "JSON (*.json)")
 
@@ -665,6 +672,7 @@ class ProjectView:
     def draw_turmite_specific(self):
         self.draw_transition_table()
         self.draw_state_table(self.ui.turmiteStatesTableWidget, self.current_turmite_colors(), "Add Turmite state")
+        self.ui.turmitePositionLabel.setText(f"Position: {self.current_turmite().position}")
 
     def start_simulation(self):
         self.ui.playToolButton.clicked.connect(self.stop_simulation)
@@ -684,6 +692,10 @@ class ProjectView:
         self.ui.playToolButton.setText("Start")
         self.ui.actionPlay.setText("Start")
 
+    def update_iteration_nr(self):
+        self.ui.iterationNumberLabel.setText(f"Iteration: {self.project.model.iteration}. Turmite: {self.project.model.small_step + 1}")
+        self.ui.turmitePositionLabel.setText(f"Position: {self.current_turmite().position}")
+
     def tick(self):
         for _ in range(self.ui.speedSpinBox.value()):
             try:
@@ -701,16 +713,45 @@ class ProjectView:
                 )
                 return
 
+        self.update_iteration_nr()
         self.turmites_view.draw_turmites()
 
     def step_one_turmite(self):
-        self.project.model.step_small()
+        try:
+            self.project.model.step_small()
+        except turmites.turmite.UnknownStateError:
+            self.stop_simulation()
+            current_turmite = self.project.model.small_step
+            QtW.QMessageBox.critical(
+                self.ui.centralwidget,
+                f"Unknown state encountered in Turmite #{current_turmite + 1}",
+                "The simulation was paused. There exists no entry in the transition table for the following:\n"
+                f"Cell state: {self.project.model.grid[self.project.model.turmites[current_turmite].position]}\n"
+                f"Turmite state: {self.project.model.turmites[current_turmite].state}\n"
+                f"Add an appropriate entry to the transition table and resume the simulation."
+            )
+            return
+        self.update_iteration_nr()
         self.turmites_view.draw_turmites()
         self.ui.selectedTurmiteComboBox.setCurrentIndex(self.project.model.small_step)
         self.draw_turmite_specific()
 
     def full_step(self):
-        self.project.model.step()
+        try:
+            self.project.model.step()
+        except turmites.turmite.UnknownStateError:
+            self.stop_simulation()
+            current_turmite = self.project.model.small_step
+            QtW.QMessageBox.critical(
+                self.ui.centralwidget,
+                f"Unknown state encountered in Turmite #{current_turmite + 1}",
+                "The simulation was paused. There exists no entry in the transition table for the following:\n"
+                f"Cell state: {self.project.model.grid[self.project.model.turmites[current_turmite].position]}\n"
+                f"Turmite state: {self.project.model.turmites[current_turmite].state}\n"
+                f"Add an appropriate entry to the transition table and resume the simulation."
+            )
+            return
+        self.update_iteration_nr()
         self.turmites_view.draw_turmites()
 
     def reorder_up(self):

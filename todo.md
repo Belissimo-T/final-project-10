@@ -7,5 +7,5 @@
 - [X] display number
 - [X] swap left/right
 - [ ] zoom reset
-- [ ] iterationsschritte
-- [ ] Position Turmites
+- [X] iterationsschritte
+- [X] Position Turmites

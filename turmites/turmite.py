@@ -128,6 +128,7 @@ class MultipleTurmiteModel:
         self.turmites = [] if turmites is None else turmites
         self.grid = InfiniteGrid[CellColor](default=0) if grid is None else grid
         self.small_step = _small_step
+        self.iteration: int = 0
 
     def step_small(self):
         curr_turmite = self.turmites[self.small_step]
@@ -137,6 +138,8 @@ class MultipleTurmiteModel:
         self.grid[turmite_pos] = new_color
 
         self.small_step += 1
+        if self.small_step >= len(self.turmites):
+            self.iteration += 1
         self.small_step %= len(self.turmites)
 
     def step(self):
