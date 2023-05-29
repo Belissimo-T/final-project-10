@@ -654,13 +654,21 @@ class ProjectView:
             self
         )
 
+        self.ui.placeToolButton.disconnect()
         self.ui.playToolButton.clicked.connect(self.start_simulation)
+        self.ui.actionPlay.disconnect()
         self.ui.actionPlay.triggered.connect(self.start_simulation)
+        self.ui.fullStepToolButton.disconnect()
         self.ui.fullStepToolButton.clicked.connect(self.full_step)
+        self.ui.actionFullStep.disconnect()
         self.ui.actionFullStep.triggered.connect(self.full_step)
+        self.ui.stepOneTurmiteToolButton.disconnect()
         self.ui.stepOneTurmiteToolButton.clicked.connect(self.step_one_turmite)
+        self.ui.actionStepOneTurmite.disconnect()
         self.ui.actionStepOneTurmite.triggered.connect(self.step_one_turmite)
+        self.ui.reorderUpToolButton.disconnect()
         self.ui.reorderUpToolButton.clicked.connect(self.reorder_up)
+        self.ui.reorderDownToolButton.disconnect()
         self.ui.reorderDownToolButton.clicked.connect(self.reorder_down)
 
         self.update_iteration_nr()
@@ -682,19 +690,25 @@ class ProjectView:
         self.ui.turmitePositionLabel.setText(f"Position: {self.current_turmite().position}")
 
     def start_simulation(self):
+        try:
+            self.ui.playToolButton.clicked.disconnect(self.start_simulation)
+            self.ui.actionPlay.triggered.disconnect(self.start_simulation)
+        except TypeError:
+            pass
         self.ui.playToolButton.clicked.connect(self.stop_simulation)
-        self.ui.playToolButton.clicked.disconnect(self.start_simulation)
         self.ui.actionPlay.triggered.connect(self.stop_simulation)
-        self.ui.actionPlay.triggered.disconnect(self.start_simulation)
         self.tick_timer.start()
         self.ui.playToolButton.setText("Stop")
         self.ui.actionPlay.setText("Stop")
 
     def stop_simulation(self):
+        try:
+            self.ui.playToolButton.clicked.disconnect(self.stop_simulation)
+            self.ui.actionPlay.triggered.disconnect(self.stop_simulation)
+        except TypeError:
+            pass
         self.ui.playToolButton.clicked.connect(self.start_simulation)
-        self.ui.playToolButton.clicked.disconnect(self.stop_simulation)
         self.ui.actionPlay.triggered.connect(self.start_simulation)
-        self.ui.actionPlay.triggered.disconnect(self.stop_simulation)
         self.tick_timer.stop()
         self.ui.playToolButton.setText("Start")
         self.ui.actionPlay.setText("Start")
@@ -809,6 +823,8 @@ class MainWindow(QtW.QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
 
+        self.project_view = None
+
         project = Project() if project is None else project
         self.set_project(project)
 
@@ -827,6 +843,8 @@ class MainWindow(QtW.QMainWindow, Ui_MainWindow):
         self.set_project(project)
 
     def set_project(self, project: Project):
+        if self.project_view is not None:
+            self.project_view.stop_simulation()
         self.project_view = ProjectView(project, self)
         self.project_view.init()
 
