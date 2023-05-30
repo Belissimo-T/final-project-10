@@ -130,11 +130,12 @@ class Turmite:
 
 
 class MultipleTurmiteModel:
-    def __init__(self, turmites: list[Turmite] = None, grid: InfiniteGrid[CellColor] = None, _small_step: int = 0):
+    def __init__(self, turmites: list[Turmite] = None, grid: InfiniteGrid[CellColor] = None, _small_step: int = 0,
+                 _iteration: int = 0):
         self.turmites = [] if turmites is None else turmites
         self.grid = InfiniteGrid[CellColor](default=0) if grid is None else grid
         self.small_step = _small_step
-        self.iteration: int = 0
+        self.iteration = _iteration
 
     def step_small(self):
         curr_turmite = self.turmites[self.small_step]
@@ -156,7 +157,8 @@ class MultipleTurmiteModel:
         return {
             "turmites": [turmite.to_json() for turmite in self.turmites],
             "grid": self.grid.to_json(),
-            "small_step": self.small_step
+            "small_step": self.small_step,
+            "iteration": self.iteration
         }
 
     @classmethod
@@ -164,5 +166,6 @@ class MultipleTurmiteModel:
         return cls(
             [Turmite.from_json(turmite_json) for turmite_json in data["turmites"]],
             InfiniteGrid.from_json(data["grid"]),
-            data["small_step"]
+            data["small_step"],
+            data["iteration"]
         )
