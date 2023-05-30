@@ -487,11 +487,11 @@ class ProjectView:
 
             if (cell_color, turmite_state) in self.current_turmite().transition_table:
                 # disable row
-                for col in range(table.columnCount() - 1):
+                for col in range(2, table.columnCount() - 1):
                     table.cellWidget(row, col).setEnabled(False)
             else:
                 # enable row
-                for col in range(table.columnCount() - 1):
+                for col in range(2, table.columnCount() - 1):
                     table.cellWidget(row, col).setEnabled(True)
 
             self.current_turmite().transition_table.set_entry(
