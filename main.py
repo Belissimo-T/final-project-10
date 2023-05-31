@@ -38,7 +38,7 @@ class StateColors:
         return cls({int(state): QtG.QColor(color) for state, color in data.items()})
 
     def get_color(self, state: StateType) -> QtG.QColor:
-        return self.states[state]
+        return self.states.get(state, QtG.QColor(128, 128, 128))
 
     def set_color(self, state: StateType, color: QtG.QColor):
         self.states[state] = color
@@ -186,10 +186,7 @@ class TurmitesGraphicsView:
         if cell_state == self.turmite_model.grid.default:
             return
 
-        try:
-            cell_color = self.cell_state_colors.get_color(cell_state)
-        except KeyError:
-            cell_color = QtG.QColor(128, 128, 128)
+        cell_color = self.cell_state_colors.get_color(cell_state)
 
         self.cell_graphics_items[position] = self.scene.addRect(
             QtC.QRectF(x * self._scale, y * self._scale, self._scale, self._scale),
@@ -205,10 +202,9 @@ class TurmitesGraphicsView:
 
         for i, (turmite, state_colors) in enumerate(zip(self.turmite_model.turmites, self.turmite_state_colors)):
             x, y = turmite.position
-            try:
-                turmite_color = state_colors.get_color(turmite.state)
-            except KeyError:
-                turmite_color = QtG.QColor(128, 128, 128)
+
+            turmite_color = state_colors.get_color(turmite.state)
+
 
             self.turmite_graphics_items.append(
                 self.scene.addEllipse(
