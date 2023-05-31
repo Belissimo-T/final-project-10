@@ -15,6 +15,7 @@
 \setmainfont{Liberation Sans}
 \setsansfont{Liberation Sans}
 \setmonofont{Liberation Mono}
+% \usepackage{mathptmx}
 
 \addtokomafont{disposition}{\rmfamily}
 
@@ -39,7 +40,6 @@
 % richtige Silbentrennung
 % passende Darstellung des Datums
 \usepackage[ngerman]{babel}
-\addto\captionsngerman{\renewcommand{\refname}{Quellenverzeichnis}}
 
 % \usepackage{mathtools}
 
@@ -53,6 +53,15 @@
 \usepackage{url}
 
 \usepackage[table]{xcolor}
+
+\usepackage{graphicx}
+
+\usepackage{listings}
+
+\lstset{basicstyle=\footnotesize\ttfamily, breaklines=true}
+\lstset{framextopmargin=50pt}
+
+% \usepackage{color}
 
 % \usepackage{microtype}
 
@@ -73,6 +82,7 @@
 
 \tableofcontents
 
+\filbreak
 \section*{Kurzreferat}
 \addcontentsline{toc}{section}{\protect\numberline{}Kurzreferat}
 \input{abstract.tex}
@@ -83,26 +93,33 @@
 
 \pagebreak
 
-% \addcontentsline{toc}{section}{\protect\numberline{}Quellenverzeichnis}
-\bibliographystyle{plain}
+\addcontentsline{toc}{section}{\protect\numberline{}Bildquellen}
+\section*{Bildquellen}
+Alle Bilder wurden selbst erstellt.
+
+\addcontentsline{toc}{section}{\protect\numberline{}Literatur}
+\bibliographystyle{ieeetr}
 \bibliography{refs}
 
-\section*{Selbstständigkeitserklärung}
-\addcontentsline{toc}{section}{\protect\numberline{}Selbstständigkeitserklärung}
-Ich, Bela Tollkien, erkläre hiermit, dass die vorliegende Dokumentation eigenständig und ohne fremde, nicht angegebene Hilfe verfasst wurde. Alle verwendeten Quellen wurden korrekt zitiert und ordnungsgemäß angegeben.
+\filbreak
+\begin{samepage}
+	\section*{Selbstständigkeitserklärung}
+	\addcontentsline{toc}{section}{\protect\numberline{}Selbstständigkeitserklärung}
+	Ich, Bela Tollkien, erkläre hiermit, dass die vorliegende Dokumentation eigenständig und ohne fremde, nicht angegebene Hilfe verfasst wurde. Alle verwendeten Quellen wurden korrekt zitiert und ordnungsgemäß angegeben.
 
-\vspace{2cm}
+	\vspace{2cm}
 
-\noindent
+	\noindent
 
-\begin{tabular}{p{5cm}p{.5cm}l}
-	\dotfill \\ 
-	Ort, Datum
-\end{tabular}
-\hfill
-\begin{tabular}{p{5cm}p{.5cm}l}
-	\dotfill \\ 
-	Unterschrift
-\end{tabular}
+	\begin{tabular}{p{5cm}p{.5cm}l}
+		\dotfill \\ 
+		Ort, Datum
+	\end{tabular}
+	\hfill
+	\begin{tabular}{p{5cm}p{.5cm}l}
+		\dotfill \\ 
+		Unterschrift
+	\end{tabular}
+\end{samepage}
 
 \end{document} 
