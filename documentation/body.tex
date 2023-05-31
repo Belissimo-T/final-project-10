@@ -1,9 +1,9 @@
 \section{Motivation}
-Das Thema wurde gewählt, weil zelluläre Automaten Teil des wahlobligatorischen Mathematikunterrichts waren. Dort wurde im Lernbereich der Chaostheorie die unten beschriebene "Langton's Ant" kurz behandelt. Diese stellt jedoch einen einfachen Sonderfall dar. 
+Das Thema wurde gewählt, weil zelluläre Automaten Teil des wahlobligatorischen Mathematikunterrichts waren. Dort wurde im Lernbereich der Chaostheorie die unten beschriebene "Langton's Ant" \cite{langtonsant} kurz behandelt. Diese stellt jedoch einen einfachen Sonderfall dar. 
 
 Ziel dieser praktischen Umsetzung der Theorie des Unterrichts ist die Simulation von allgemeinen Turmites. Dafür muss dem Benutzer erlaubt werden, das Verhalten beziehungsweise die Regeln der Turmites zu definieren. Das Programm soll als Möglichkeit dienen, den gelernten Stoff aus dem Unterricht zu vertiefen, festigen und erweitern. Dabei wird eine gewisse Grundkenntnis der zugrundeliegenden Theorie vorausgesetzt.
 
-Als Besonderheit soll die Simulation mehrerer Turmites gleichzeitig möglich sein. Dies erfordert eine Erweiterung der Theorie, da die Turmites nacheinander agieren und sich gegenseitig beeinflussen. Letzteres ist besonders interessant, weil sich erst aus der Interaktion mehrerer Turmites mit potentiell verschiedenen Regeln neues Verhalten entstehen kann.
+Als Besonderheit soll die Simulation mehrerer Turmites gleichzeitig möglich sein. Dies erfordert eine Erweiterung der Theorie, da die Turmites nacheinander agieren und sich gegenseitig beeinflussen. Letzteres ist besonders interessant, weil aus der Interaktion mehrerer Turmites mit potentiell verschiedenen Regeln neues Verhalten entstehen kann.
 
 \begin{figure}[!htb]
     \minipage{0.32\textwidth}
@@ -16,15 +16,15 @@ Als Besonderheit soll die Simulation mehrerer Turmites gleichzeitig möglich sei
       \includegraphics[width=\linewidth]{three.png}
     \endminipage
 
-    \caption{Zwei gespiegelt agierende Langton's ants erzeugen zusammen eine "Linie".}
+    \caption{Zwei gespiegelt agierende "Langton's Ants" erzeugen zusammen eine "Linie".}
 \end{figure}
 
 
 \section{Turmites}
-Turmites sind zelluläre Automaten. Dabei handelt es sich um "Maschinen", die, einer Übergangstabelle folgend, sich auf einem unendlichen Quadratgitter bewegen. Sie besitzen jeweils eine Position, Blickrichtung sowie einen Zustand. Für die Simulation ist eine fortlaufende Iteration notwendig. Dabei wird wie folgt vorgegangen:
+Turmites sind zelluläre Automaten. Dabei handelt es sich um "Maschinen", die, einer Übergangstabelle folgend, sich auf einem unendlichen Quadratgitter bewegen. \cite{turmites} Sie besitzen jeweils eine Position, Blickrichtung sowie einen Zustand. Für die Simulation ist eine fortlaufende Iteration notwendig. Dabei wird wie folgt vorgegangen:
 \begin{enumerate}
     \item Die Turmite liest die Farbe des Feldes, auf dem sie sich befindet.
-    \item Anhand der Übergangstabelle entscheidet sie eine neue Zellfarbe und Drehrichtung
+    \item Anhand der Übergangstabelle entscheidet sie eine neue Zellfarbe und Drehrichtung.
     \item Die Turmite ändert die Farbe des Feldes, auf dem sie sich befindet.
     \item Die Turmite dreht sich anhand der Drehrichtung.
     \item Die Turmite bewegt sich ein Feld in Blickrichtung.
@@ -54,7 +54,7 @@ Ein Spezialfall einer Turmite ist die "Langton's Ant". Jeden Iterationsschritt w
 % \label{tab:langton}
 
 \subsection{Mehrere Turmites auf einem Quadratgitter}
-Zur Erfüllung des Kannkriteriums 2 \cite{pflichtenheft} wurde die Software so erweitert, dass mehrere Turmites gleichzeitig auf einem Quadratgitter simuliert werden können. Dabei müssen mehrere Dinge beachtet werden:
+Zur Erfüllung des Kannkriteriums Nr. 2 \cite{pflichtenheft} wurde die Software so erweitert, dass mehrere Turmites gleichzeitig auf einem Quadratgitter simuliert werden können. Dabei müssen mehrere Dinge beachtet werden:
 
 \begin{itemize}
     \item Die Reihenfolge der Turmites ist nicht beliebig und muss vor der Simulation klar definiert sein, da die Turmites in jedem Iterationsschritt nacheinander agieren.
@@ -67,12 +67,16 @@ Ergebnis des Projektes ist sowohl das \texttt{turmites}-Python-Modul als auch di
 \subsection{Benutzeroberfläche}
 Zur besseren Verständlichkeit werden alle Zustände (Zellzustand/Turmite-Zustand) zusätzlich mit einer Farbe repräsentiert. 
 
-Als Sprache des Interfaces und aller Bezeichner wurde Englisch gewählt, da das Programm so universeller und für mehr Personen zugänglich ist. Auf Einstellbarkeit der Sprache wurde verzichtet, da dies aus Zeitgründen nicht umsetzbar war sowie nicht im Pflichtenheft \cite{pflichtenheft} gefordert wurde.
+Als Sprache des User Interfaces und aller Bezeichner wurde Englisch gewählt, da das Programm so universeller und für mehr Personen zugänglich ist. Auf Einstellbarkeit der Sprache wurde verzichtet, da dies aus Zeitgründen nicht umsetzbar war sowie nicht im Pflichtenheft \cite{pflichtenheft} gefordert wurde.
 
-Es wurde darauf geachtet, Layouts zu verwenden, um das Skalieren von Benutzeroberflächenelementen beim Verändern der Fenstergröße zu ermöglichen.
+Es wurde darauf geachtet, Qt-Layouts zu verwenden, um das Skalieren von Benutzeroberflächenelementen beim Verändern der Fenstergröße zu ermöglichen.
 
 \subsubsection{Hauptfenster}
-\includegraphics[width=\textwidth]{main_window.png}
+
+\begin{figure}[!htb]
+    \includegraphics[width=\textwidth]{main_window.png}
+    \caption{Hauptfenster}
+\end{figure}
 
 In der Werkzeugleiste des Hauptfensters lässt sich die Simulation mit dem "Start"-Knopf starten sowie stoppen. Dieser ändert seine Aufschrift entsprechend. Daneben lässt sich die Simulationsgeschwindigkeit einstellen. Um nur einen Simulationsschritt durchzuführen, kann man entweder den "Step all Turmites"-Knopf betätigen, der eine volle Iteration durchführt, oder den "Step single Turmite"-Knopf betätigen, der nur den Simulationsschritt einer Turmite durchführt. Bei mehreren Turmites erfordert es somit mehrere Klicks letzteren Knopfes, um eine volle Iteration durchzuführen. Es wurden außerdem Tool-Tips zu ausgewählten Knöpfen hinzugefügt, um die Bedienung zu erleichtern.
 
@@ -90,7 +94,7 @@ Falls eine Turmite keine Anweisung für eine bestimmte Bedingung besitzt, wird e
 \includegraphics[width=\textwidth]{unknown_state.png}
 
 \subsubsection{Zell- und Turmite-Zustände}
-Per Rechtsklick lässt sich die Farbe von Zuständen nachträglich ändern sowie ein Zustand löschen. Per Knopfdruck lässt sich ein neuer Zustand hinzufügen. Die Nummer des neuen Zustandes wird dabei automatisch ergänzt und die Farbe ist durch den Benutzer mittels Colorchooser auswählbar.
+Per Rechtsklick lässt sich die Farbe von Zuständen nachträglich ändern sowie ein Zustand löschen. Per Knopfdruck lässt sich ein neuer Zustand hinzufügen. Die Nummer des neuen Zustandes wird dabei automatisch ergänzt und die Farbe ist durch den Benutzer mittels Farbauswahl auswählbar.
 
 \includegraphics[width=\textwidth]{context_menu_states.png}
 
@@ -107,12 +111,12 @@ Das einfärben der verschiedenen Zustände ist jedoch in der Darstellung impleme
 
 Generell wurde bei der Entwicklung auf eine möglichst objektorientierte Programmierung geachtet.
 
-Um das Speichern und Öffnen (Serialisierung und Deserialisierung) zu ermöglichen, sind alle relevanten Klassen mit \texttt{to\_json()}- und \texttt{from\_json()}-Methoden ausgestattet. JSON wurde gewählt, da es ein einfaches und menschenlesbares Format ist, was die Implementierung erleichtert. Außerdem ist es in Python bereits integriert.
+Um das Speichern und Öffnen (Serialisierung und Deserialisierung) zu ermöglichen, sind alle relevanten Klassen mit \texttt{to\_json()}- und \texttt{from\_json()}-Methoden ausgestattet. JSON \cite{json} wurde gewählt, da es ein einfaches und menschenlesbares Format ist, was die Implementierung erleichtert. Außerdem ist es in Python bereits integriert.
 
 \subsubsection{"Unendliches" Quadratgitter}
-Auch wenn die Simulationssfläche praktisch gesehen endlich ist, da irgendwann jede noch so effiziente Implementierung den Arbeitsspeicher des Computers voll auslastet, wurde darauf geachtet, dass die Speicherauslastung nicht von der Distanz der aktivierten Zelle zu einem Koordinatenursprung abhängt, sondern von der Anzahl an aktivierten Zellen.
+Auch wenn die Simulationsfläche praktisch gesehen endlich ist, da irgendwann jede noch so effiziente Implementierung den Arbeitsspeicher des Computers voll auslastet, wurde darauf geachtet, dass die Speicherauslastung nicht von der Distanz der aktivierten Zelle zu einem Koordinatenursprung abhängt, sondern von der Anzahl an aktivierten Zellen.
 
-Dies wurde Umgesetzt unter Zuhilfenahme eines Python-Dictionaries, welches die Koordinaten der aktiven Zellen als Schlüssel und die jeweiligen Zustände als Werte speichert. Dadurch ist die Zugriffszeit auf eine Zelle konstant und unabhängig von der Anzahl an Zellen. Die Speicherauslastung steigt jedoch linear zur Anzahl an Zellen. Im Gegensatz zu einem zweidimensionalen Array, welches die Speicherauslastung quadratisch zur Distanz zum Koordinatenursprung steigen lassen würde, ist dies jedoch ein akzeptabler Kompromiss. Zudem ist es nicht trivial, die Größe eines solchen Arrays dynamisch anzupassen. Außerdem werden nichtaktivierte oder deaktivierte Zellen, sprich Zellen die den Standardwert besitzen, nicht im Dictionary gespeichert, um Speicherplatz zu sparen.
+Dies wurde umgesetzt unter Zuhilfenahme eines Python-Dictionaries, welches die Koordinaten der aktiven Zellen als Schlüssel und die jeweiligen Zustände als Werte speichert. Dadurch ist die Zugriffszeit auf eine Zelle konstant und unabhängig von der Anzahl an Zellen. Die Speicherauslastung steigt jedoch linear zur Anzahl an Zellen. Im Gegensatz zu einem zweidimensionalen Array, welches die Speicherauslastung quadratisch zur Distanz zum Koordinatenursprung steigen lassen würde, ist dies jedoch ein akzeptabler Kompromiss. Zudem ist es nicht trivial, die Größe eines solchen Arrays dynamisch anzupassen. Außerdem werden nichtaktivierte oder deaktivierte Zellen, sprich Zellen die den Standardwert besitzen, nicht im Dictionary gespeichert, um Speicherplatz zu sparen.
 
 Es folgt ein minimales Beispiel für eine solche Implementierung:
 
@@ -144,10 +148,10 @@ Das gesonderte Speichern der Übergangstabelle (der "Regeln" \cite[1.1.6]{pflich
 \subsection{Benutzeroberfläche}
 Der gesamte Code für die Kernlogik umfasst ca. 174 Zeilen \cite{cloc}, während die Datei \texttt{main.py}, welche sich Vordergründig mit der Verwaltung der Benutzeroberfläche befasst, ca. 627 Code-Zeilen \cite{cloc} besitzt. Dies zeigt den Aufwand der Implementierung der Benutzeroberfläche, welche den Großteil der Entwicklungszeit in Anspruch genommen hat, während die Kernlogik innerhalb weniger Stunden implementiert war.
 
-Diese Komplexität stammt unter anderem daher, dass Änderungen während der Simulation erlaubt und sofort übernommen werden sowie dass es viele Grenzfälle gibt, die alle überprüft werden müssen. Ein noch nicht hinreichend behandelter Fall ist das Löschen von Turmite oder Zellzuständen während einer Simulation, die bereits genutzt werden. Aus Gründen der Softwarearchitektur ist es ohne große oder unschöne Änderungen nicht möglich, das Löschen beider Zustandsarten separat beziehungsweise anders zu behandeln, da diese in einer abstrahierten Art und Weise implementiert sind.
+Diese Komplexität stammt unter anderem daher, dass Änderungen während der Simulation erlaubt und sofort übernommen werden sowie dass es viele Grenzfälle gibt, die alle überprüft werden müssen. Ein noch nicht hinreichend behandelter Fall ist das Löschen von Turmite- oder Zellzuständen während einer Simulation, die bereits genutzt werden. Aus Gründen der Softwarearchitektur ist es ohne größere Änderungen nicht möglich, das Löschen beider Zustandsarten separat beziehungsweise anders zu behandeln, da diese in einer abstrahierten Art und Weise implementiert sind.
 
 \subsubsection{Übergangstabelle}
-Die Implementierung der Übergangstabelle war sehr aufwendig. Dies liegt mitunter daran, dass es möglich ist, ungültige Übergangstabellen einzugeben, sowie dass die Farben sich automatisch und sofort ändern müssen wenn der Benutzer diese nachträglich in den Tabellen darunter ändert. Weiterhin wäre es von Vorteil für den Benutzer, wenn beispielsweise fehlende Einträge direkt angezeigt werden, statt erst beim Ausführen der Simulation zu einem Fehler zu führen. Über die Positionierung des Knopfes zum Hinzufügen eines Eintrages lässt sich Diskutieren, da dieser mit der Zeit immer weiter nach unten rutscht.
+Die Implementierung der Übergangstabelle war sehr aufwendig. Dies liegt mitunter daran, dass es möglich ist, ungültige Übergangstabellen einzugeben, sowie dass die Farben sich automatisch und sofort ändern müssen, wenn der Benutzer diese nachträglich in den Tabellen darunter ändert. Weiterhin wäre es von Vorteil für den Benutzer, wenn beispielsweise fehlende Einträge direkt angezeigt werden, statt erst beim Ausführen der Simulation zu einem Fehler zu führen. Über die Positionierung des Knopfes zum Hinzufügen eines Eintrages lässt sich Diskutieren, da dieser mit der Zeit immer weiter nach unten rutscht.
 
 Generell wäre es eventuell besser gewesen, die Übergangstabelle in Textform einzugeben, statt als Qt-Tabelle mit Drop-Down-Menüs. Dies hätte die Implementierung deutlich vereinfacht, jedoch die Benutzerfreundlichkeit verringert. Das gleichzeitige oder gruppierte Konfigurieren mehrerer Turmites wäre ebenfalls eine sinnvolle Erweiterung.
 
@@ -156,4 +160,4 @@ Das Speicherformat der Simulationsfläche ist verbesserungswürdig. Aktuell werd
 
 Das Testen der Applikation ist unzulänglich erfolgt, weshalb viele noch nicht betrachtete Grenzfälle existieren und, wenn ausgelöst, das Programm zum Absturz bringen. Zudem wurde das Programm auch auf anderen Betriebssystemen wie Linux und MacOS getestet, jeweils mit bestimmten Problemen, die auf Windows nicht auftreten. Deshalb wurde die Behebung dieser Fehler auch nicht weiter verfolgt.
 
-Generell folgt der Programmcode der \texttt{main.py} nur begrenzt den best practices und Vorgaben der objektorientierten Programmierung wie zum Beispiel der separation of concerns. 
+Generell folgt der Programmcode der \texttt{main.py} nur begrenzt den best practices und Vorgaben der objektorientierten Programmierung wie zum Beispiel der separation of concerns \cite{separationofconcerns}. 
